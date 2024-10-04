@@ -18,10 +18,13 @@
 
 ### 2a. Brief project description (what algorithms will you be comparing and on what architectures)
 - Architecture: For all the algorithms below we will be implementing them with an MPI architecture
-- Bitonic Sort:
-- Sample Sort:
-- Merge Sort:
-- Radix Sort:
+- Bitonic Sort:This algorithm will implemented by
+
+- Sample Sort:This algorithm will implemented by
+
+- Merge Sort: At its base the merge sort is considered a recursive algorithm, and usually has a runtime of n log(n). This algorithm will implemented by Aditya Biradar
+
+- Radix Sort:This algorithm will implemented by
 
 ### 2b. Pseudocode for each parallel algorithm
 - For MPI programs, include MPI calls you will use to coordinate between processes
@@ -33,49 +36,88 @@
     code 
 
 
-- Merge Sort(Aditya - I will finish this later):
+- Merge Sort:
+```
+
     MergeSort():
-        Splitter(array):
-            Check length of array len(array):
-                If length == 0 || length == 1:
-                    return array 
-                else:
-                    Split array into two halves:
+         if((taskid == 0 )):
+            //Master Process
+                //Split the array into two halves
                     split=len(array)//2 **round down to nearest whole number**
-                    lhs_array= array[:split]
-                    rhs_array= array[split:]
+                            lhs_array= array[:split]
+                            rhs_array= array[split:]
+                //Send each half to a processer(worker)
+                    MPI_SEND(lhs)
+                    MPI_SEND(rhs)
+
+                //receive results from worker
+                MPI Recv(lhs)
+                MPI Recv(rhs)
 
 
-                    lhs_sort=Splitter(lhs_array)
-                    rhs_sort=Splitter(rhs_array)
-
-                    return MERGE_SORT
-        MERGE_SORT(lhs,rhs):
-            sort vector=[]
-
-            while(length of lhs and rhs != 0):
-                if lhs[0] < rhs[0]:
-                    remove first element from lhs and append to sort
-                else:
-                    remove first element from rhs and append to sort
-            
-            if(len(lhs)!=0 and len(rhs)==0):
-                append lhs array to sort
-
-            if(len(rhs)!=0 and len(lhs)==0):
-                append rhs array to sort
-            
-            return sort
-            
-
-
-            
                 
-        
+
+                sort the final array of halves
+
+                MERGE_SORT(lhs,rhs):
+                    sort vector=[]
+
+                    while(length of lhs and rhs != 0):
+                        if lhs[0] < rhs[0]:
+                            remove first element from lhs and append to sort
+                        else:
+                            remove first element from rhs and append to sort
+                    
+                    if(len(lhs)!=0 and len(rhs)==0):
+                        append lhs array to sort
+
+                    if(len(rhs)!=0 and len(lhs)==0):
+                        append rhs array to sort
+                    
+                    return sort
+
+
+         if(taskid > 0 ):
+            //Recieve the array from master
+                MPI_Recv() calls
+            
+            Further split the array into single pieces
+                        If length == 0 || length == 1:
+                                    return array 
+                        split=len(array)//2 **round down to nearest whole number**
+                        lhs_array= array[:split]
+                        rhs_array= array[split:]
+
+                        
+                        lhs_sort=Splitter(lhs_array)
+                        rhs_sort=Splitter(rhs_array)
+
+            //sort the half
+             sort vector=[]
+
+                while(length of lhs and rhs != 0):
+                    if lhs[0] < rhs[0]:
+                        remove first element from lhs and append to sort
+                    else:
+                        remove first element from rhs and append to sort
+                
+                if(len(lhs)!=0 and len(rhs)==0):
+                    append lhs array to sort
+
+                if(len(rhs)!=0 and len(lhs)==0):
+                    append rhs array to sort
+                
+                return sort
+
+                // send result back to master
+                MPI SEND
+
+```
+             
 
         
-
-
+        
+            
 
 
 - Radix Sort:
