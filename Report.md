@@ -149,9 +149,9 @@
 
 # Main function to initialize MPI and distribute the data
 Function parallel_msd_radix_sort(data):
-    comm = MPI.COMM_WORLD
-    rank = comm.Get_rank()
-    size = comm.Get_size()
+    MPI_Init()
+    rank = MPI_Comm_rank(MPI_COMM_WORLD)
+    size = MPI_Comm_size(MPI_COMM_WORLD)
 
     # Step 1: Scatter data across processors
     local_data_size = len(data) // size
