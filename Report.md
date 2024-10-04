@@ -108,8 +108,70 @@
 
 - Radix Sort:
 ```
+    Function msd_radix_sort_mpi(data, digit_position, low, high, rank, size, comm):
+    If low >= high OR digit_position < 0:
+        Return  # Base case: no more sorting needed
 
-    code 
+    # Step 1: Local histogram creation
+    Initialize local_histogram[10] = {0}
+    For i from low to high:
+        local_histogram[get_digit(data[i], digit_position)] += 1
+
+    # Step 2: Global histogram (MPI Reduce)
+    Initialize global_histogram[10] = {0}
+    MPI_Reduce(local_histogram, global_histogram, SUM, root = 0)
+
+    # Step 3: Compute bucket positions (root process) and broadcast
+    If rank == 0:
+        cumulative_sum[0] = 0
+        For i from 1 to 9:
+            cumulative_sum[i] = cumulative_sum[i-1] + global_histogram[i-1]
+    MPI_Bcast(cumulative_sum, root = 0)
+
+    # Step 4: In-place bucket sorting
+    i = low
+    While i <= high:
+        digit = get_digit(data[i], digit_position)
+        correct_pos = cumulative_sum[digit]
+        If i >= correct_pos AND i < correct_pos + global_histogram[digit]:
+            i += 1
+        Else:
+            Swap data[i] with data[correct_pos]
+            cumulative_sum[digit] += 1
+
+    # Step 5: Recursively sort each bucket
+    For digit from 0 to 9:
+        next_start = cumulative_sum[digit] - global_histogram[digit]
+        next_end = cumulative_sum[digit] - 1
+        If next_start < next_end:
+            msd_radix_sort_mpi(data, digit_position - 1, next_start, next_end, rank, size, comm)
+
+
+# Main function to initialize MPI and distribute the data
+Function parallel_msd_radix_sort(data):
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
+    size = comm.Get_size()
+
+    # Step 1: Scatter data across processors
+    local_data_size = len(data) // size
+    if rank == 0:
+        local_data = np.array_split(data, size)
+    else:
+        local_data = None
+    local_data = comm.scatter(local_data, root=0)
+
+    # Step 2: Apply the MSD Radix Sort on the local data
+    max_digit_position = get_max_digit_position(data)  # Find max digit length
+    msd_radix_sort_mpi(local_data, max_digit_position, 0, len(local_data) - 1, rank, size, comm)
+
+    # Step 3: Gather sorted subarrays back to root
+    sorted_data = comm.gather(local_data, root=0)
+
+    if rank == 0:
+        # Merge the results from all processors
+        return np.concatenate(sorted_data)
+    
 ```
 
 
