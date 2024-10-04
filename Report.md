@@ -47,31 +47,32 @@
     MergeSort():
         if((taskid == 0 )):
             //Master Process
-            //Split the array into two halves
-            split=len(array)//2 **round down to nearest whole number**
-            lhs_array= array[:split]
-            rhs_array= array[split:]
+            //Split the array into halves proportionate to the number of processors
+            split=len(array)//num of processors  **round down to nearest whole number**
 
-            //Send each half to a processer(worker)
-            MPI_SEND(lhs_array)
-            MPI_SEND(rhs_array)
+            //MPI_SCATTER scatter halves to processors(in)
+            master_to_worker=MPI_SCATTER()
 
-            //receive results from worker
-            MPI Recv(lhs)
-            MPI Recv(rhs)
+            //sort the local chunk in the master
+            local_sort= splitter(local_array)
 
-            //sort the final array of halves
-            MERGE_SORT(lhs_array,rhs_array)
+            //MPI Gather call to bring the sorted arrays back into one array 
+            worker_to_master=MPI_GATHER()
+
+            //sort the final array from the gather
+            final_array=MERGE_SORT(worker_to_master)
             
 
         if(taskid > 0 ):
-            //Recieve the array from master
-            MPI_Recv() call
-
+            //Recieve the array from the scatter call
+            MPI_SCATTER()
+            
+            //sort the array 
             Splitter(recv array)
             
             // send result back to master
-            MPI SEND(recv array)
+            MPI_GATHER()
+            
 
         Splitter(array):
             If length == 0 || length == 1:
