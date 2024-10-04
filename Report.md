@@ -18,13 +18,13 @@
 
 ### 2a. Brief project description (what algorithms will you be comparing and on what architectures)
 - Architecture: For all the algorithms below we will be implementing them with an MPI architecture
-- Bitonic Sort:This algorithm will implemented by
+- Bitonic Sort: This algorithm will implemented by
 
 - Sample Sort:This algorithm will implemented by
 
-- Merge Sort: At its base the merge sort is considered a recursive algorithm, and usually has a runtime of n log(n). This algorithm will implemented by Aditya Biradar
+- Merge Sort: At its base the merge sort is considered a recursive algorithm, and usually has a runtime of n log(n). In this assignment we will be paralleizing this algorithm. This algorithm will implemented by Aditya Biradar
 
-- Radix Sort:This algorithm will implemented by
+- Radix Sort: This algorithm will implemented by
 
 ### 2b. Pseudocode for each parallel algorithm
 - For MPI programs, include MPI calls you will use to coordinate between processes
@@ -66,7 +66,7 @@
 
         if(taskid > 0 ):
             //Recieve the array from master
-            MPI_Recv() calls
+            MPI_Recv() call
 
             Splitter(recv array)
             
@@ -105,10 +105,6 @@
 ```
              
 
-        
-        
-            
-
 
 - Radix Sort:
 ```
@@ -124,6 +120,5 @@ For our input sizes we will start from a small n size for our array and then pro
 With this measurement this could show dimishing returns as we try to find the optimized amount of processors for a given problem.
 - Weak scaling (increase problem size, increase number of processors)
 With this measurement, we could find the limit on each processor and how it takes for something to compute among those algorithms. 
-
 - Run time(): 
 With this measurement we can compare the run times and although some algorithms inherently may be quicker than others, it's still good to compare to see how much extra time a certain algorithm could take to understand the costs associated with a  given algorithm.
