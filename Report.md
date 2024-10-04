@@ -8,7 +8,7 @@
 3. Third: Eduardo Alvarez
 4. Fourth: Juan Carrasco 
 
-## 1a. Method of Communication:
+### 1a. Method of Communication:
 - We will use normal phone messaging as our method of coomunication for this project
 
 ## 2. Project topic (e.g., parallel sorting algorithms)
@@ -30,88 +30,78 @@
 - For MPI programs, include MPI calls you will use to coordinate between processes
 
 - Bitonic Sort:
+```
     code 
 
+```
 - Sample Sort:
+```
+
     code 
+```
 
 
 - Merge Sort:
 ```
 
     MergeSort():
-         if((taskid == 0 )):
+        if((taskid == 0 )):
             //Master Process
-                //Split the array into two halves
-                    split=len(array)//2 **round down to nearest whole number**
-                            lhs_array= array[:split]
-                            rhs_array= array[split:]
-                //Send each half to a processer(worker)
-                    MPI_SEND(lhs)
-                    MPI_SEND(rhs)
+            //Split the array into two halves
+            split=len(array)//2 **round down to nearest whole number**
+            lhs_array= array[:split]
+            rhs_array= array[split:]
 
-                //receive results from worker
-                MPI Recv(lhs)
-                MPI Recv(rhs)
+            //Send each half to a processer(worker)
+            MPI_SEND(lhs_array)
+            MPI_SEND(rhs_array)
 
+            //receive results from worker
+            MPI Recv(lhs)
+            MPI Recv(rhs)
 
-                
-
-                sort the final array of halves
-
-                MERGE_SORT(lhs,rhs):
-                    sort vector=[]
-
-                    while(length of lhs and rhs != 0):
-                        if lhs[0] < rhs[0]:
-                            remove first element from lhs and append to sort
-                        else:
-                            remove first element from rhs and append to sort
-                    
-                    if(len(lhs)!=0 and len(rhs)==0):
-                        append lhs array to sort
-
-                    if(len(rhs)!=0 and len(lhs)==0):
-                        append rhs array to sort
-                    
-                    return sort
-
-
-         if(taskid > 0 ):
-            //Recieve the array from master
-                MPI_Recv() calls
+            //sort the final array of halves
+            MERGE_SORT(lhs_array,rhs_array)
             
-            Further split the array into single pieces
-                        If length == 0 || length == 1:
-                                    return array 
-                        split=len(array)//2 **round down to nearest whole number**
-                        lhs_array= array[:split]
-                        rhs_array= array[split:]
 
-                        
-                        lhs_sort=Splitter(lhs_array)
-                        rhs_sort=Splitter(rhs_array)
+        if(taskid > 0 ):
+            //Recieve the array from master
+            MPI_Recv() calls
 
-            //sort the half
-             sort vector=[]
+            Splitter(recv array)
+            
+            // send result back to master
+            MPI SEND(recv array)
 
-                while(length of lhs and rhs != 0):
-                    if lhs[0] < rhs[0]:
-                        remove first element from lhs and append to sort
-                    else:
-                        remove first element from rhs and append to sort
-                
-                if(len(lhs)!=0 and len(rhs)==0):
-                    append lhs array to sort
+        Splitter(array):
+            If length == 0 || length == 1:
+                return array 
+            split=len(array)//2 **round down to nearest whole number**
+            lhs_array= array[:split]
+            rhs_array= array[split:]
 
-                if(len(rhs)!=0 and len(lhs)==0):
-                    append rhs array to sort
-                
-                return sort
+            
+            lhs_sort=Splitter(lhs_array)
+            rhs_sort=Splitter(rhs_array)
+            
+            return MERGE_SORT(lhs,rhs)
 
-                // send result back to master
-                MPI SEND
+        MERGE_SORT(lhs,rhs):
+            sort vector=[]
 
+            while(length of lhs and rhs != 0):
+                if lhs[0] < rhs[0]:
+                    remove first element from lhs and append to sort
+                else:
+                    remove first element from rhs and append to sort
+            
+            if(len(lhs)!=0 and len(rhs)==0):
+                append lhs array to sort
+
+            if(len(rhs)!=0 and len(lhs)==0):
+                append rhs array to sort
+            
+            return sort
 ```
              
 
@@ -121,10 +111,19 @@
 
 
 - Radix Sort:
+```
+
     code 
+```
 
 
 ### 2c. Evaluation plan - what and how will you measure and compare
-- Input sizes, Input types
+- Input sizes, Input types :
+For our input sizes we will start from a small n size for our array and then progrssively make it larger
 - Strong scaling (same problem size, increase number of processors/nodes)
+With this measurement this could show dimishing returns as we try to find the optimized amount of processors for a given problem.
 - Weak scaling (increase problem size, increase number of processors)
+With this measurement, we could find the limit on each processor and how it takes for something to compute among those algorithms. 
+
+- Run time(): 
+With this measurement we can compare the run times and although some algorithms inherently may be quicker than others, it's still good to compare to see how much extra time a certain algorithm could take to understand the costs associated with a  given algorithm.
