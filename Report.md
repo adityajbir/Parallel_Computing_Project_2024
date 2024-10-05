@@ -30,7 +30,7 @@
 - For MPI programs, include MPI calls you will use to coordinate between processes
 
 - Bitonic Sort
-```
+```python
 // Pseudocode for Parallel Bitonic Sort using MPI
 
 // Initialize MPI environment
@@ -103,7 +103,7 @@ function BitonicMerge(data, received_data, order):
 
 ```
 - Sample Sort
-```
+```python
 function sampleSort():
     # Step 1: Initialize MPI
     MPI.Init()
@@ -174,8 +174,7 @@ function sampleSort():
 
 
 - Merge Sort
-```
-
+```python
     MergeSort():
         if((taskid == 0 )):
             //Master Process
@@ -238,7 +237,7 @@ function sampleSort():
 ```
              
 - Radix Sort
-```
+```python
     Function msd_radix_sort_mpi(data, digit_position, low, high, rank, size, comm):
     If low >= high OR digit_position < 0:
         Return  # Base case: no more sorting needed
