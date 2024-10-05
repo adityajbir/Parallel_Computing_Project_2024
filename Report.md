@@ -24,7 +24,7 @@
 
 - Merge Sort (Aditya Biradar): At its base the merge sort is considered a recursive algorithm, and usually has a runtime of n log(n). In this assignment we will be paralleizing this algorithm.
 
-- Radix Sort: Radix Sort is a non-comparative sorting algorithm that processes individual digits of the numbers in a given list, sorting them based on place value. The runtime for Radix Sort is typically O(d*(n + k)), where d is the number of digits in the largest number, n is the number of elements, and k is the range of digits.
+- Radix Sort (Eduardo Alvarez Hernandez): Radix Sort is a non-comparative sorting algorithm that processes individual digits of the numbers in a given list, sorting them based on place value. The runtime for Radix Sort is typically O(d*(n + k)), where d is the number of digits in the largest number, n is the number of elements, and k is the range of digits.
 
 ### 2b. Pseudocode for each parallel algorithm
 - For MPI programs, include MPI calls you will use to coordinate between processes
