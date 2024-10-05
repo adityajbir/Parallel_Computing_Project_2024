@@ -18,7 +18,7 @@
 
 ### 2a. Brief project description (what algorithms will you be comparing and on what architectures)
 - Architecture: For all the algorithms below we will be implementing them with an MPI architecture
-- Bitonic Sort (Juan Carrasco): This algorithm will implemented by
+- Bitonic Sort: This algorithm requires the size of the input to be a power of 2, it creates a bitonic sequence from the array before making comparisons and returning a sorted array. The runtime of this algorithm is N/P log^2(N/P), where P is the number of processors. This algorithm will be implemented by Juan Carrasco 
 
 - Sample Sort (Eyad Nazir): A parallel sorting algorithm that divides the input array into smaller subarrays, sorts them independently, and merges them back together.
 
@@ -31,7 +31,75 @@
 
 - Bitonic Sort
 ```
-    code 
+// Pseudocode for Parallel Bitonic Sort using MPI
+
+// Initialize MPI environment
+MPI_Init()
+rank = MPI_Comm_rank(MPI_COMM_WORLD)
+size = MPI_Comm_size(MPI_COMM_WORLD)
+
+// N is the total number of elements to sort
+// P is the number of processors (P = size)
+N_local = N / P   // Divide data evenly among processors
+
+// Step 1: Local Sorting
+// Generate or receive local data for each process
+local_data = GetLocalData(rank, N_local)
+
+// Perform local bitonic sort on each processor
+// Bitonic sort on local data
+BitonicSort(local_data, N_local)
+
+// Step 2: Bitonic Merge Across Processors
+// Start the parallel merging using the bitonic merge network
+// Phase 1: Up-sweep phase
+for stage in 1 to log2(P):
+    for step in 0 to log2(N_local):
+        partner = rank XOR 2^(stage - 1)  // Determine partner processor
+
+        // Communicate with the partner process
+        MPI_Sendrecv(local_data, N_local, partner)
+        
+        // Perform local comparison and merge
+        if (rank < partner):
+            // Merge for increasing order
+            BitonicMerge(local_data, received_data, "ASCENDING")
+        else:
+            // Merge for decreasing order
+            BitonicMerge(local_data, received_data, "DESCENDING")
+
+// Step 3: Global Communication and Final Sort
+// Continue merging until the entire sequence is sorted
+for stage in 1 to log2(N):
+    step = 2^stage
+    for i in 0 to N_local - 1:
+        // Compare and merge elements within each local block
+        if (i % step == 0):
+            BitonicMerge(local_data[i:i+step], "ASCENDING")
+
+// Step 4: Gather the results from all processors
+sorted_data = MPI_Gather(local_data, N_local, MPI_COMM_WORLD)
+
+// Finalize MPI
+MPI_Finalize()
+
+// BitonicSort function: Sorts a sequence using bitonic sorting network
+function BitonicSort(data, N_local):
+    for k in 2 to N_local step *= 2:
+        for j = k/2 down to 1:
+            for i in 0 to N_local - 1:
+                if ((i & k) == 0):
+                    CompareAndSwap(data[i], data[i+j], "ASCENDING")
+                else:
+                    CompareAndSwap(data[i], data[i+j], "DESCENDING")
+
+// BitonicMerge function: Merges two sorted sequences
+function BitonicMerge(data, received_data, order):
+    for i = 0 to N_local - 1:
+        if (order == "ASCENDING" and data[i] > received_data[i]):
+            Swap(data[i], received_data[i])
+        else if (order == "DESCENDING" and data[i] < received_data[i]):
+            Swap(data[i], received_data[i])
 
 ```
 - Sample Sort
