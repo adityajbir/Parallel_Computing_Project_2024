@@ -18,30 +18,94 @@
 
 ### 2a. Brief project description (what algorithms will you be comparing and on what architectures)
 - Architecture: For all the algorithms below we will be implementing them with an MPI architecture
-- Bitonic Sort: This algorithm will implemented by
+- Bitonic Sort (Juan Carrasco): This algorithm will implemented by
 
-- Sample Sort:This algorithm will implemented by
+- Sample Sort (Eyad Nazir): A parallel sorting algorithm that divides the input array into smaller subarrays, sorts them independently, and merges them back together.
 
-- Merge Sort: At its base the merge sort is considered a recursive algorithm, and usually has a runtime of n log(n). In this assignment we will be paralleizing this algorithm. This algorithm will implemented by Aditya Biradar
+- Merge Sort (Aditya Biradar): At its base the merge sort is considered a recursive algorithm, and usually has a runtime of n log(n). In this assignment we will be paralleizing this algorithm.
 
-- Radix Sort: This algorithm will implemented by
+- Radix Sort (Eduardo Alvarez): This algorithm will implemented by
 
 ### 2b. Pseudocode for each parallel algorithm
 - For MPI programs, include MPI calls you will use to coordinate between processes
 
-- Bitonic Sort:
+- Bitonic Sort
 ```
     code 
 
 ```
-- Sample Sort:
+- Sample Sort
+```
+function sampleSort():
+    # Step 1: Initialize MPI
+    MPI.Init()
+    rank = MPI.Comm_rank()        # Get process rank
+    size = MPI.Comm_size()        # Get number of processes
+
+    # Step 2: Root generates data
+    if rank == 0:
+        data = generate_data()    # Root generates full data set
+
+    # Step 3: Calculate send counts and displacements (only root)
+    if rank == 0:
+        base_count = len(data) // size
+        remainder = len(data) % size
+        send_counts = [base_count + (1 if i < remainder else 0) for i in range(size)]
+        send_displs = [sum(send_counts[:i]) for i in range(size)]
+
+    # Step 4: Broadcast send counts
+    send_counts = MPI.Bcast(send_counts)
+
+    # Step 5: Allocate space for local data
+    local_data = allocate_array(send_counts[rank])  # Each process gets its portion
+
+    # Step 6: Scatter data to all processes
+    MPI.Scatterv(data, local_data)
+
+    # Step 7: Sort local data
+    local_data.sort()
+
+    # Step 8: Select local samples
+    sample_gap = len(local_data) // (size - 1)
+    local_samples = [local_data[i * sample_gap] for i in range(1, size)]
+
+    # Step 9: Gather samples at root
+    all_samples = MPI.Gather(local_samples)
+
+    # Step 10: Root chooses splitters
+    if rank == 0:
+        all_samples.sort()
+        splitters = [all_samples[i * (size - 1)] for i in range(1, size)]
+
+    # Step 11: Broadcast splitters
+    splitters = MPI.Bcast(splitters)
+
+    # Step 12: Partition local data
+    partitions = [[] for _ in range(size)]
+    for elem in local_data:
+        dest = find_partition(splitters, elem)
+        partitions[dest].append(elem)
+
+    # Step 13: Exchange partitions
+    received_data = MPI.Alltoall(partitions)
+
+    # Step 14: Sort received data
+    received_data.sort()
+
+    # Step 15: Gather sorted data at root
+    sorted_data = MPI.Gatherv(received_data)
+
+    # Step 16: Print final sorted data (root)
+    if rank == 0:
+        print(sorted_data)
+
+    # Step 17: Finalize MPI
+    MPI.Finalize()
+
 ```
 
-    code 
-```
 
-
-- Merge Sort:
+- Merge Sort
 ```
 
     MergeSort():
@@ -105,9 +169,7 @@
             return sort
 ```
              
-
-
-- Radix Sort:
+- Radix Sort
 ```
     Function msd_radix_sort_mpi(data, digit_position, low, high, rank, size, comm):
     If low >= high OR digit_position < 0:
@@ -177,11 +239,21 @@ Function parallel_msd_radix_sort(data):
 
 
 ### 2c. Evaluation plan - what and how will you measure and compare
-- Input sizes, Input types :
-For our input sizes we will start from a small n size for our array and then progrssively make it larger
-- Strong scaling (same problem size, increase number of processors/nodes)
-With this measurement this could show dimishing returns as we try to find the optimized amount of processors for a given problem.
-- Weak scaling (increase problem size, increase number of processors)
-With this measurement, we could find the limit on each processor and how it takes for something to compute among those algorithms. 
-- Run time(): 
-With this measurement we can compare the run times and although some algorithms inherently may be quicker than others, it's still good to compare to see how much extra time a certain algorithm could take to understand the costs associated with a  given algorithm.
+- Input sizes, Input types:
+  - For our input sizes, we will start from a small n size for our array and then progressively make it larger.
+  - Input sizes: \(2^{16}\), \(2^{18}\), \(2^{20}\), \(2^{22}\), \(2^{24}\), \(2^{26}\), \(2^{28}\)
+  - Input types:
+    - Sorted arrays
+    - Reverse sorted arrays
+    - Random arrays
+    - 1% perturbed
+- Strong scaling (same problem size, increase number of processors/nodes):
+  - With this measurement, this could show diminishing returns as we try to find the optimized amount of processors for a given problem.
+  - Number of processors/nodes: 2, 4, 8, 32, 64, 128, 256, 512, 1024
+
+- Weak scaling (increase problem size, increase number of processors):
+  - With this measurement, we could find the limit on each processor and how long it takes for something to compute among those algorithms.
+  - Number of processors/nodes: 2, 4, 8, 32, 64, 128, 256, 512, 1024
+
+- Run time():
+  - With this measurement, we can compare the run times and although some algorithms inherently may be quicker than others, it's still good to compare to see how much extra time a certain algorithm could take to understand the costs associated with a given algorithm.
