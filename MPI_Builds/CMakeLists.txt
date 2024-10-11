@@ -11,5 +11,5 @@ include_directories(SYSTEM ${MPI_INCLUDE_PATH})
 include_directories(${caliper_INCLUDE_DIR})
 include_directories(${adiak_INCLUDE_DIRS})
 
-add_executable(main_executable ../main.cpp ../sortVerify.cpp)
+add_executable(main_executable ../main.cpp ../input.cpp ../sortVerify.cpp)
 target_link_libraries(main_executable PRIVATE MPI::MPI_CXX)

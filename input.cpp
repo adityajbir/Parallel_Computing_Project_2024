@@ -4,45 +4,53 @@
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
-#include <numeric>  // For std::iota
-#include <random>  // For random number generation
-#include <stdexcept>  // For std::invalid_argument
+#include <numeric>
+#include <random>
+#include <stdexcept>
 
 
 enum DataType {
     sorted,
     reverseSorted,
-    random,
+    rands,
     perturbed
 };
 
-bool verify_sorted(const std::vector<int>& array);
-std::vector<int> generate_random_array(int size, const DataType dataType);
 std::vector<int> generate_data_chunk(int start, int end, const DataType dataType);
 
-std::vector<int> generate_random_array(int size, const DataType dataType) {
-    int chunkSize = size / MPI::COMM_WORLD.Get_size();
-    int start = rank * chunkSize;
-    int end = (rank == MPI::COMM_WORLD.Get_size() - 1) ? size : start + chunkSize;
+std::vector<int> generate_random_array(int arraySize, const DataType dataType) {
+    int rank, numProcs;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &numProcs);
+
+    int chunkSize = arraySize / numProcs;
+    int remainder = arraySize % numProcs;
+    int start = rank * chunkSize + std::min(rank, remainder);
+    int end = start + chunkSize + (rank < remainder ? 1 : 0);
 
     std::vector<int> localDataChunk = generate_data_chunk(start, end, dataType);
     std::vector<int> gatheredDataChunk;
 
     if (rank == 0) {
-        gatheredDataChunk.resize(size);
+        gatheredDataChunk.resize(arraySize);
     }
 
-    MPI_Gather(localDataChunk.data(), localDataChunk.size(), MPI_INT,
-                    gatheredDataChunk.data(), localDataChunk.size(), MPI_INT,
-                    0, MPI_COMM_WORLD);
+    std::vector<int> counts(numProcs), displacements(numProcs);
+    for (int i = 0; i < numProcs; ++i) {
+        counts[i] = (i < remainder) ? chunkSize + 1 : chunkSize;
+        displacements[i] = (i > 0) ? displacements[i - 1] + counts[i - 1] : 0;
+    }
+
+    MPI_Gatherv(localDataChunk.data(), localDataChunk.size(), MPI_INT,
+                gatheredDataChunk.data(), counts.data(), displacements.data(), MPI_INT,
+                0, MPI_COMM_WORLD);
 
     if (rank == 0) {
         std::vector<int> finalData;
-        for (const auto& chunk : gatheredDataChunk) {
-            finalData.insert(finalData.end(), chunk.begin(), chunk.end());
-        }
-        std::cout << "Generated " << dataType << " data of size " << size << " across " << size << " nodes." << std::endl;
+	std::cout << "Generated " << dataType << " data of size " << arraySize << " across " << numProcs << " nodes." << std::endl;
+        return gatheredDataChunk;
     }
+    return {};
 }
 
 std::vector<int> generate_data_chunk(int start, int end, const DataType dataType) {
@@ -51,7 +59,7 @@ std::vector<int> generate_data_chunk(int start, int end, const DataType dataType
         std::iota(data.begin(), data.end(), start);
     } else if (dataType == reverseSorted) {
         std::iota(data.rbegin(), data.rend(), start);
-    } else if (dataType == random) {
+    } else if (dataType == rands) {
         std::mt19937 rng(std::random_device{}());
         std::uniform_int_distribution<int> dist(0, end);
         std::generate(data.begin(), data.end(), [&]() { return dist(rng); });
@@ -69,4 +77,28 @@ std::vector<int> generate_data_chunk(int start, int end, const DataType dataType
     return data;
 }
 
-#endif // VERIFY_SORTED_H
+// // Main function for testing
+// int main(int argc, char *argv[]) {
+//     MPI_Init(&argc, &argv);
+
+//     int rank, size;
+//     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+//     MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+//     // Example usage
+//     int array_size = 1000; // Example array size
+//     DataType data_type = random; // Example data type
+
+//     std::vector<int> data = generate_random_array(array_size, data_type);
+
+//     if (rank == 0) {
+//         std::cout << "Generated array: ";
+//         for (int i = 0; i < data.size(); i++) {
+//             std::cout << data[i] << " ";
+//         }
+//         std::cout << std::endl;
+//     }
+
+//     MPI_Finalize();
+//     return 0;
+// }
