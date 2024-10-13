@@ -1,11 +1,17 @@
 #include "common.h"
+#include <limits.h> // For INT_MAX and INT_MIN
 
 bool sortVerify(const std::vector<int>& inputArray) {
     int rank, size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-    int N = inputArray.size();
+    int N = 0;
+    if (rank == 0) {
+        N = inputArray.size();
+    }
+    // Broadcast N to all processes
+    MPI_Bcast(&N, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
     int localSize = N / size;
     int remainder = N % size;
@@ -13,60 +19,70 @@ bool sortVerify(const std::vector<int>& inputArray) {
         localSize += 1;
     }
 
-    std::vector<int> local_array(localSize);
-    std::vector<int> sendCounts(size);
-    std::vector<int> sendDispls(size);
-
+    std::vector<int> local_array(localSize > 0 ? localSize : 1);
+    std::vector<int> sendCounts(size, 0);
+    std::vector<int> sendDispls(size, 0);
     if (rank == 0) {
         int sum = 0;
         for (int i = 0; i < size; ++i) {
-            sendCounts[i] = N / size;
-            if (i < remainder) {
-                sendCounts[i] += 1;
-            }
+            sendCounts[i] = N / size + (i < remainder ? 1 : 0);
             sendDispls[i] = sum;
             sum += sendCounts[i];
         }
     }
 
+    const int* sendbuf = nullptr;
+    int* sendCountsPtr = nullptr;
+    int* sendDisplsPtr = nullptr;
+    if (rank == 0) {
+        sendbuf = inputArray.data();
+        sendCountsPtr = sendCounts.data();
+        sendDisplsPtr = sendDispls.data();
+    }
+
+    int dummy;
+    int* recvbuf = localSize > 0 ? local_array.data() : &dummy;
+
     // Scatter the inputArray to all processes
     MPI_Scatterv(
-        inputArray.data(),       // Send buffer (root process)
-        sendCounts.data(),       // Send counts
-        sendDispls.data(),       // Displacements
-        MPI_INT,                 // Data type
-        local_array.data(),      // Receive buffer
-        localSize,               // Receive count
-        MPI_INT,                 // Data type
-        0,                       // Root process
-        MPI_COMM_WORLD           // Communicator
+        sendbuf,              // Send buffer (root process)
+        sendCountsPtr,        // Send counts
+        sendDisplsPtr,        // Displacements
+        MPI_INT,              // Data type
+        recvbuf,              // Receive buffer
+        localSize,            // Receive count
+        MPI_INT,              // Data type
+        0,                    // Root process
+        MPI_COMM_WORLD        // Communicator
     );
 
     // Local sorting verification
     for (int i = 0; i < localSize - 1; ++i) {
         if (local_array[i] > local_array[i + 1]) {
-            return false; // local array is not sorted
+            return false;
         }
     }
-    //if sorted then front is min and back is max
-    int local_min = local_array.front(); 
-    int local_max = local_array.back();
 
     // Boundary verification
-    bool boundary_sorted = true;
-    int prev_max = 0;
+    int local_min = (localSize > 0) ? local_array.front() : INT_MAX;
+    int local_max = (localSize > 0) ? local_array.back() : INT_MIN;
 
-    if (rank < size - 1) { // send the last element from the local array to the next process
+    int prev_max = INT_MIN;
+    if (rank < size - 1) {
         MPI_Send(&local_max, 1, MPI_INT, rank + 1, 0, MPI_COMM_WORLD);
     }
-
-    if (rank > 0) { // receive the last element from the previous process
+    if (rank > 0) {
         MPI_Recv(&prev_max, 1, MPI_INT, rank - 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    }
+
+    bool boundary_sorted = true;
+    if (rank > 0 && localSize > 0) {
         if (prev_max > local_min) {
             boundary_sorted = false;
         }
     }
 
+    // Global reduction to determine if the array is sorted
     bool global_result = false;
     MPI_Allreduce(
         &boundary_sorted, // sendbuf

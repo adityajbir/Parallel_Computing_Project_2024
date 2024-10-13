@@ -47,7 +47,7 @@ std::vector<int> generate_random_array(int arraySize, const DataType dataType) {
 
     if (rank == 0) {
         std::vector<int> finalData;
-	std::cout << "Generated " << dataType << " data of size " << arraySize << " across " << numProcs << " nodes." << std::endl;
+	    std::cout << "Generated " << dataType << " data of size " << arraySize << " across " << numProcs << " nodes." << std::endl;
         return gatheredDataChunk;
     }
     return {};

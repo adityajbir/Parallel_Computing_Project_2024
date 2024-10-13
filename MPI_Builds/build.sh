@@ -1,6 +1,6 @@
 #!/bin/bash
 
-module purge
+module purge > /dev/null 2>&1
 
 module load intel/2020b
 module load CMake/3.12.1

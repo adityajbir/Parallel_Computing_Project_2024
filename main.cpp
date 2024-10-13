@@ -26,6 +26,7 @@ int main(int argc, char** argv) {
           std::cout << arr[i] << " ";
       }
     }
+    std::cout << std::endl;
 
     // std::vector<int> arr(array_size);
     // for (int i = 0; i < array_size; ++i) { // this is what we need to change for input testing
