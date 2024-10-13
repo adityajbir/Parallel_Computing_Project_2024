@@ -16,7 +16,29 @@ enum DataType {
     perturbed
 };
 
-std::vector<int> generate_data_chunk(int start, int end, const DataType dataType);
+std::vector<int> generate_data_chunk(int start, int end, const DataType dataType) {
+    std::vector<int> data(end - start);
+    if (dataType == sorted) {
+        std::iota(data.begin(), data.end(), start);
+    } else if (dataType == reverseSorted) {
+        std::iota(data.rbegin(), data.rend(), start);
+    } else if (dataType == rands) {
+        std::mt19937 rng(std::random_device{}());
+        std::uniform_int_distribution<int> dist(0, end);
+        std::generate(data.begin(), data.end(), [&]() { return dist(rng); });
+    } else if (dataType == perturbed) {
+        std::iota(data.begin(), data.end(), start);
+        std::mt19937 rng(std::random_device{}());
+        std::uniform_int_distribution<int> dist(0, end);
+        int perturbation = (end - start) * 0.01;
+        for (int i = 0; i < perturbation; ++i) {
+            data[dist(rng) % data.size()] = dist(rng);
+        }
+    } else {
+        throw std::invalid_argument("Unknown data type");
+    }
+    return data;
+}
 
 std::vector<int> generate_random_array(int arraySize, const DataType dataType) {
     int rank, numProcs;
@@ -47,35 +69,12 @@ std::vector<int> generate_random_array(int arraySize, const DataType dataType) {
 
     if (rank == 0) {
         std::vector<int> finalData;
-	    std::cout << "Generated " << dataType << " data of size " << arraySize << " across " << numProcs << " nodes." << std::endl;
+        std::cout << "Generated " << dataType << " data of size " << arraySize << " across " << numProcs << " nodes." << std::endl;
         return gatheredDataChunk;
     }
     return {};
 }
 
-std::vector<int> generate_data_chunk(int start, int end, const DataType dataType) {
-    std::vector<int> data(end - start);
-    if (dataType == sorted) {
-        std::iota(data.begin(), data.end(), start);
-    } else if (dataType == reverseSorted) {
-        std::iota(data.rbegin(), data.rend(), start);
-    } else if (dataType == rands) {
-        std::mt19937 rng(std::random_device{}());
-        std::uniform_int_distribution<int> dist(0, end);
-        std::generate(data.begin(), data.end(), [&]() { return dist(rng); });
-    } else if (dataType == perturbed) {
-        std::iota(data.begin(), data.end(), start);
-        std::mt19937 rng(std::random_device{}());
-        std::uniform_int_distribution<int> dist(0, end);
-        int perturbation = (end - start) * 0.01;
-        for (int i = 0; i < perturbation; ++i) {
-            data[dist(rng) % data.size()] = dist(rng);
-        }
-    } else {
-        throw std::invalid_argument("Unknown data type");
-    }
-    return data;
-}
 
 // // Main function for testing
 // int main(int argc, char *argv[]) {
