@@ -1,20 +1,4 @@
-#include <mpi.h>
-#include <vector>
-#include <algorithm>
-#include <cstdlib>
-#include <ctime>
-#include <iostream>
-#include <numeric>
-#include <random>
-#include <stdexcept>
-
-
-enum DataType {
-    sorted,
-    reverseSorted,
-    rands,
-    perturbed
-};
+#include "common.h"
 
 std::vector<int> generate_data_chunk(int start, int end, const DataType dataType) {
     std::vector<int> data(end - start);
@@ -40,7 +24,7 @@ std::vector<int> generate_data_chunk(int start, int end, const DataType dataType
     return data;
 }
 
-std::vector<int> generate_random_array(int arraySize, const DataType dataType) {
+std::vector<int> generate_array(int arraySize, const DataType dataType) {
     int rank, numProcs;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &numProcs);

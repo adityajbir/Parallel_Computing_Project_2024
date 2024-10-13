@@ -1,5 +1,5 @@
 #include "common.h"
-#include <limits.h> // For INT_MAX and INT_MIN
+
 
 bool sortVerify(const std::vector<int>& inputArray) {
     int rank, size;

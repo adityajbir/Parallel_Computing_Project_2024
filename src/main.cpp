@@ -1,7 +1,4 @@
-#include <iostream>
-#include <vector>
-#include <mpi.h>
-#include "common.h"
+#include "../common/common.h"
 
 int main(int argc, char** argv) {
     // Initialize MPI
@@ -20,23 +17,13 @@ int main(int argc, char** argv) {
 
     int array_size = std::stoi(argv[1]);
 
-    std::vector<int> arr = generate_random_array(array_size, sorted);
+    std::vector<int> arr = generate_array(array_size, sorted);
     if(rank == 0) {
   	for(int i = 0; i < array_size; i++){
           std::cout << arr[i] << " ";
       }
     }
     std::cout << std::endl;
-
-    // std::vector<int> arr(array_size);
-    // for (int i = 0; i < array_size; ++i) { // this is what we need to change for input testing
-    //     if (i % 2 == 0) {
-    //         arr[i] = array_size - i;
-    //     } else {
-    //         arr[i] = i;
-    //     }
-    //     // arr[i] = i;
-    // }
 
     // Call the sortVerify function
     bool isSorted = sortVerify(arr);
