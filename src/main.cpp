@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
     }
 
     // Call the sortVerify function
-    bool isSorted = sortVerify(arr);
+    bool isSorted = sortVerify(sortedArr);
 
     // Only the master process (rank 0) prints the result
     if (rank == 0) {
