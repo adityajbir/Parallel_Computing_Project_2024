@@ -1,4 +1,3 @@
-// sampleSort.cpp
 #include "../common/common.h"
 
 std::vector<int> sampleSort(const std::vector<int>& inputArray) {

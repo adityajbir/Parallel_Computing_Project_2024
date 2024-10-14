@@ -1,10 +1,4 @@
 #include "../common/common.h"
-#include <iostream>
-#include <vector>
-#include <memory>
-#include <mpi.h>
-#include <cmath> // For std::log10
-#include <algorithm> // For std::max_element
 
 #define NUM_DIGITS 10 // Base-10 for radix sort
 

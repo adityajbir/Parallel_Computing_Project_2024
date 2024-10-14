@@ -1,6 +1,5 @@
 #include "common.h"
 
-
 bool sortVerify(const std::vector<int>& inputArray) {
     int rank, size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);

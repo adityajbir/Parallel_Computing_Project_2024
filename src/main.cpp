@@ -1,5 +1,4 @@
 #include "../common/common.h"
-#include <cmath> // For std::pow
 
 int main(int argc, char** argv) {
     // Initialize MPI

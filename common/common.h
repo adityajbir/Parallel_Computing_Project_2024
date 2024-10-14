@@ -9,6 +9,8 @@
 #include <random>
 #include <stdexcept>
 #include <limits.h>
+#include <memory>
+#include <cmath> 
 
 enum DataType {
     sorted,
@@ -16,7 +18,6 @@ enum DataType {
     rands,
     perturbed
 };
-
 
 // input data generation
 std::vector<int> generate_array(int size, const DataType dataType);
