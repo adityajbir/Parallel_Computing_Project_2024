@@ -1,4 +1,5 @@
 #include "../common/common.h"
+#include <cmath> // For std::pow
 
 int main(int argc, char** argv) {
     // Initialize MPI
@@ -18,6 +19,10 @@ int main(int argc, char** argv) {
     }
 
     int arraySize = std::stoi(argv[1]);
+
+    if (argc > 2 && argv[2] != 0) {
+        arraySize = std::pow(2, std::stoi(argv[2]));
+    }
 
     std::vector<int> arr = generate_array(arraySize, rands);
     if(rank == 0) {

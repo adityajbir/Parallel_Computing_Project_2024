@@ -19,6 +19,7 @@
 #
 array_size=$1
 processes=$2
+power_of_2=${3:- -1}  # Default to -1 if not provided
 
 module load intel/2020b > /dev/null 2>&1       # load Intel software stack
 module load CMake/3.12.1 > /dev/null 2>&1
@@ -28,4 +29,4 @@ CALI_CONFIG="spot(output=p${processes}-a${array_size}.cali, \
     time.variance,profile.mpi)" \
 # mpirun -np $processes ./mergesort $array_size
 
-mpirun -np $processes ./main_executable $array_size
+mpirun -np $processes ./main_executable $array_size $power_of_2
