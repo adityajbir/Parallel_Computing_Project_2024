@@ -11,21 +11,31 @@ int main(int argc, char** argv) {
 
     if (argc < 2) {
         if (rank == 0) {
-            std::cerr << "Usage: " << argv[0] << " <array_size>" << std::endl;
+            std::cerr << "Usage: " << argv[0] << " <arraySize>" << std::endl;
         }
         MPI_Finalize(); // Finalize MPI before exiting
         return 1;
     }
 
-    int array_size = std::stoi(argv[1]);
+    int arraySize = std::stoi(argv[1]);
 
-    std::vector<int> arr = generate_array(array_size, sorted);
+    std::vector<int> arr = generate_array(arraySize, rands);
     if(rank == 0) {
-        for(int i = 0; i < array_size; i++){
+        std::cout << "Input Array: " << std::endl;
+        for(int i = 0; i < arraySize; i++){
               std::cout << arr[i] << " ";
         }
+        std::cout << std::endl << "#######################################" << std::endl;
     }
-    std::cout << std::endl;
+
+    std::vector<int> sortedArr = sampleSort(arr); // testing sampleSort function
+    if(rank == 0) {
+        std::cout << "Sorted Array: " << std::endl;
+        for(int i = 0; i < arraySize; i++){
+              std::cout << sortedArr[i] << " ";
+        }
+        std::cout << std::endl << "#######################################" << std::endl;
+    }
 
     // Call the sortVerify function
     bool isSorted = sortVerify(arr);
