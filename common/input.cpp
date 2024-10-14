@@ -58,30 +58,3 @@ std::vector<int> generate_array(int arraySize, const DataType dataType) {
     }
     return {};
 }
-
-
-// // Main function for testing
-// int main(int argc, char *argv[]) {
-//     MPI_Init(&argc, &argv);
-
-//     int rank, size;
-//     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-//     MPI_Comm_size(MPI_COMM_WORLD, &size);
-
-//     // Example usage
-//     int array_size = 1000; // Example array size
-//     DataType data_type = random; // Example data type
-
-//     std::vector<int> data = generate_random_array(array_size, data_type);
-
-//     if (rank == 0) {
-//         std::cout << "Generated array: ";
-//         for (int i = 0; i < data.size(); i++) {
-//             std::cout << data[i] << " ";
-//         }
-//         std::cout << std::endl;
-//     }
-
-//     MPI_Finalize();
-//     return 0;
-// }

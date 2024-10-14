@@ -5,7 +5,9 @@ int main(int argc, char** argv) {
     MPI_Init(&argc, &argv);
 
     int rank;
+    int size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
 
     if (argc < 2) {
         if (rank == 0) {
@@ -19,9 +21,9 @@ int main(int argc, char** argv) {
 
     std::vector<int> arr = generate_array(array_size, sorted);
     if(rank == 0) {
-  	for(int i = 0; i < array_size; i++){
-          std::cout << arr[i] << " ";
-      }
+        for(int i = 0; i < array_size; i++){
+              std::cout << arr[i] << " ";
+        }
     }
     std::cout << std::endl;
 
