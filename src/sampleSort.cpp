@@ -8,9 +8,18 @@ std::vector<int> sampleSort(const std::vector<int>& inputArray) {
     int N;
     if (rank == 0) {
         N = inputArray.size();
+        if (N == 0){
+            std::cerr << "Input array is empty" << std::endl;
+            return std::vector<int>();
+        }
     }
+
     // Step 1: Broadcast the total number of elements to all processes
+    CALI_MARK_BEGIN(CALI_COMM);
+    CALI_MARK_BEGIN(CALI_COMM_SMALL);
     MPI_Bcast(&N, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    CALI_MARK_END(CALI_COMM_SMALL);
+    CALI_MARK_END(CALI_COMM);
 
     // Step 2: Compute sendCounts and sendDispls on all processes for MPI_Scatterv
     int base_count = N / size;
@@ -28,6 +37,9 @@ std::vector<int> sampleSort(const std::vector<int>& inputArray) {
     // Step 3: Distribute data among processes using MPI_Scatterv
     int localSize = scatterSendCounts[rank];
     std::vector<int> localArray(localSize);
+
+    CALI_MARK_BEGIN(CALI_COMM);
+    CALI_MARK_BEGIN(CALI_COMM_LARGE);
     MPI_Scatterv(
         rank == 0 ? inputArray.data() : nullptr, // Send buffer
         scatterSendCounts.data(),                // Send counts
@@ -39,11 +51,19 @@ std::vector<int> sampleSort(const std::vector<int>& inputArray) {
         0,                                       // Root process
         MPI_COMM_WORLD                           // Communicator
     );
+    CALI_MARK_END(CALI_COMM_LARGE);
+    CALI_MARK_END(CALI_COMM);
 
     // Step 4: Each process sorts its local data
+    CALI_MARK_BEGIN(CALI_COMP);
+    CALI_MARK_BEGIN(CALI_COMP_LARGE);
     std::sort(localArray.begin(), localArray.end());
+    CALI_MARK_END(CALI_COMP_LARGE);
+    CALI_MARK_END(CALI_COMP);
 
     // Step 5: Each process selects local samples
+    CALI_MARK_BEGIN(CALI_COMP);
+    CALI_MARK_BEGIN(CALI_COMP_SMALL);
     int s = size - 1; // Number of samples per process
     std::vector<int> localSamples;
     if (!localArray.empty()) {
@@ -57,8 +77,12 @@ std::vector<int> sampleSort(const std::vector<int>& inputArray) {
         }
     }
     int localSampleSize = localSamples.size();
+    CALI_MARK_END(CALI_COMP_SMALL);
+    CALI_MARK_END(CALI_COMP);
 
     // Step 6: Gather sample sizes at the root process
+    CALI_MARK_BEGIN(CALI_COMM);
+    CALI_MARK_BEGIN(CALI_COMM_SMALL);
     std::vector<int> recvSampleSizes(size);
     MPI_Gather(
         &localSampleSize,       // Send buffer
@@ -70,6 +94,8 @@ std::vector<int> sampleSort(const std::vector<int>& inputArray) {
         0,                      // Root process
         MPI_COMM_WORLD          // Communicator
     );
+    CALI_MARK_END(CALI_COMM_SMALL);
+    CALI_MARK_END(CALI_COMM);
 
     // Step 7: Compute displacements and total number of samples at the root
     std::vector<int> sampleRecvDispls(size, 0);
@@ -82,6 +108,8 @@ std::vector<int> sampleSort(const std::vector<int>& inputArray) {
     }
 
     // Step 8: Gather all samples at the root process
+    CALI_MARK_BEGIN(CALI_COMM);
+    CALI_MARK_BEGIN(CALI_COMM_SMALL);
     std::vector<int> gatheredSamples;
     if (rank == 0) {
         gatheredSamples.resize(totalSamples);
@@ -97,10 +125,14 @@ std::vector<int> sampleSort(const std::vector<int>& inputArray) {
         0,                       // Root process
         MPI_COMM_WORLD           // Communicator
     );
+    CALI_MARK_END(CALI_COMM_SMALL);
+    CALI_MARK_END(CALI_COMM);
 
     // Step 9: Root process selects splitters from gathered samples
     std::vector<int> splitters(size - 1);
     if (rank == 0) {
+        CALI_MARK_BEGIN(CALI_COMP);
+        CALI_MARK_BEGIN(CALI_COMP_SMALL);
         std::sort(gatheredSamples.begin(), gatheredSamples.end());
         double interval = static_cast<double>(gatheredSamples.size()) / size;
         for (int i = 1; i < size; ++i) {
@@ -110,9 +142,13 @@ std::vector<int> sampleSort(const std::vector<int>& inputArray) {
             }
             splitters[i - 1] = gatheredSamples[idx];
         }
+        CALI_MARK_END(CALI_COMP_SMALL);
+        CALI_MARK_END(CALI_COMP);
     }
 
     // Step 10: Broadcast splitters to all processes
+    CALI_MARK_BEGIN(CALI_COMM);
+    CALI_MARK_BEGIN(CALI_COMM_SMALL);
     MPI_Bcast(
         splitters.data(), // Data buffer
         size - 1,         // Number of elements
@@ -120,15 +156,26 @@ std::vector<int> sampleSort(const std::vector<int>& inputArray) {
         0,                // Root process
         MPI_COMM_WORLD    // Communicator
     );
+    CALI_MARK_END(CALI_COMM_SMALL);
+    CALI_MARK_END(CALI_COMM);
 
     // Step 11: Each process partitions its local data based on splitters
+    CALI_MARK_BEGIN(CALI_COMP);
+    CALI_MARK_BEGIN(CALI_COMP_SMALL);
     std::vector<std::vector<int>> buckets(size);
     for (const auto& val : localArray) {
         int idx = std::upper_bound(splitters.begin(), splitters.end(), val) - splitters.begin();
         buckets[idx].push_back(val);
     }
+    CALI_MARK_END(CALI_COMP_SMALL);
+    CALI_MARK_END(CALI_COMP);
 
-    // Step 12: Prepare sendCountsAlltoall and sdisplsAlltoall for MPI_Alltoallv
+    // Steps 12-17: Prepare and exchange data using MPI_Alltoallv
+    // (Communication of varying sizes, consider as comm_large)
+    CALI_MARK_BEGIN(CALI_COMM);
+    CALI_MARK_BEGIN(CALI_COMM_LARGE);
+
+    // Prepare sendCountsAlltoall and sdisplsAlltoall
     std::vector<int> sendCountsAlltoall(size);
     std::vector<int> sdisplsAlltoall(size);
     int sendTotal = 0;
@@ -141,13 +188,13 @@ std::vector<int> sampleSort(const std::vector<int>& inputArray) {
     }
     sendTotal = sdisplsAlltoall[size - 1] + sendCountsAlltoall[size - 1];
 
-    // Step 13: Concatenate all buckets into sendBuf
+    // Concatenate all buckets into sendBuf
     std::vector<int> sendBuf(sendTotal);
     for (int i = 0; i < size; ++i) {
         std::copy(buckets[i].begin(), buckets[i].end(), sendBuf.begin() + sdisplsAlltoall[i]);
     }
 
-    // Step 14: Exchange bucket sizes using MPI_Alltoall
+    // Exchange bucket sizes using MPI_Alltoall
     std::vector<int> recvCountsAlltoall(size);
     MPI_Alltoall(
         sendCountsAlltoall.data(), // Send buffer
@@ -159,7 +206,7 @@ std::vector<int> sampleSort(const std::vector<int>& inputArray) {
         MPI_COMM_WORLD             // Communicator
     );
 
-    // Step 15: Prepare recv displacements for MPI_Alltoallv
+    // Prepare recv displacements for MPI_Alltoallv
     std::vector<int> rdisplsAlltoall(size);
     int recvTotal = 0;
     rdisplsAlltoall[0] = 0;
@@ -170,10 +217,10 @@ std::vector<int> sampleSort(const std::vector<int>& inputArray) {
         }
     }
 
-    // Step 16: Allocate receive buffer
+    // Allocate receive buffer
     std::vector<int> recvBuf(recvTotal);
 
-    // Step 17: Exchange data using MPI_Alltoallv
+    // Exchange data using MPI_Alltoallv
     MPI_Alltoallv(
         sendBuf.data(),               // Send buffer
         sendCountsAlltoall.data(),    // Send counts
@@ -186,10 +233,20 @@ std::vector<int> sampleSort(const std::vector<int>& inputArray) {
         MPI_COMM_WORLD                // Communicator
     );
 
-    // Step 18: Each process sorts its received data
-    std::sort(recvBuf.begin(), recvBuf.end());
+    CALI_MARK_END(CALI_COMM_LARGE);
+    CALI_MARK_END(CALI_COMM);
 
-    // Step 19: Gather sorted data sizes at the root process
+    // Step 18: Each process sorts its received data
+    CALI_MARK_BEGIN(CALI_COMP);
+    CALI_MARK_BEGIN(CALI_COMP_LARGE);
+    std::sort(recvBuf.begin(), recvBuf.end());
+    CALI_MARK_END(CALI_COMP_LARGE);
+    CALI_MARK_END(CALI_COMP);
+
+    // Steps 19-21: Gather sorted data sizes and data back to the root process
+    CALI_MARK_BEGIN(CALI_COMM);
+    CALI_MARK_BEGIN(CALI_COMM_LARGE);
+
     int localSortedSize = recvBuf.size();
     std::vector<int> sortedRecvSizes(size);
     MPI_Gather(
@@ -203,7 +260,6 @@ std::vector<int> sampleSort(const std::vector<int>& inputArray) {
         MPI_COMM_WORLD      // Communicator
     );
 
-    // Step 20: Compute displacements for final gathering at the root
     std::vector<int> sortedRecvDispls(size);
     if (rank == 0) {
         sortedRecvDispls[0] = 0;
@@ -212,7 +268,6 @@ std::vector<int> sampleSort(const std::vector<int>& inputArray) {
         }
     }
 
-    // Step 21: Gather sorted data back to the root process
     std::vector<int> sortedData;
     if (rank == 0) {
         sortedData.resize(N);
@@ -228,6 +283,9 @@ std::vector<int> sampleSort(const std::vector<int>& inputArray) {
         0,                     // Root process
         MPI_COMM_WORLD         // Communicator
     );
+
+    CALI_MARK_END(CALI_COMM_LARGE);
+    CALI_MARK_END(CALI_COMM);
 
     // Step 22: Return the sorted data on the root process
     if (rank == 0) {

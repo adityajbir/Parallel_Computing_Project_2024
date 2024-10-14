@@ -19,3 +19,4 @@ file(GLOB COMMON_FILES ${CMAKE_SOURCE_DIR}/../common/*.cpp)
 
 add_executable(main_executable ${SRC_FILES} ${COMMON_FILES})
 target_link_libraries(main_executable PRIVATE MPI::MPI_CXX)
+target_link_libraries(main_executable PRIVATE caliper)
