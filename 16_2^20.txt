@@ -1,0 +1,10 @@
+Generated 2 data of size 1048576 across 16 nodes.
+Input Array: 
+44352 64663 47513 50120 54113 27716 2940 38167 40579 34811 
+#######################################
+Sorted Array: 
+0 0 0 1 1 1 1 1 1 1 
+#######################################
+The array is sorted.
+JOBID        NAME                 USER                     PARTITION              NODES  CPUS  STATE        TIME         TIME_LEFT    START_TIME        REASON                   NODELIST
+11695797     JobName              eanazir                  short                  1      16    RUNNING      0:07         29:53        2024-10-14T18:28  None                     c041

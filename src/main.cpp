@@ -21,12 +21,12 @@ int main(int argc, char** argv) {
     CALI_MARK_END("MPI_Comm_size");
 
     // Initialize Adiak
-    adiak::init(MPI_COMM_WORLD);
+    adiak::init(NULL);
 
     // Collect metadata
     adiak::launchdate();    // Launch date of the job
     adiak::libraries();     // Libraries used
-    adiak::cmdline(argc, argv); // Command line used to launch the job
+    adiak::cmdline();       // Command line used to launch the job
     adiak::clustername();   // Name of the cluster
 
     if (argc < 2) {
