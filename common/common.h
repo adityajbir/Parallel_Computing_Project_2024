@@ -37,9 +37,8 @@ std::vector<int> generate_array(int size, const DataType dataType);
 std::vector<int> generate_data_chunk(int start, int end, const DataType dataType);
 
 // sort algorithms
-std::vector<int> sampleSort(const std::vector<int>& inputArray);
-void lsd_radix_sort(std::vector<int>& data, int rank, int size);
-int get_digit(int number, int digit_pos);
+std::vector<int> sampleSort(std::vector<int>& inputArray);
+std::vector<int> radixSort(std::vector<int>& inputArray);
 
 // sort verification
 bool sortVerify(const std::vector<int>& inputArray);

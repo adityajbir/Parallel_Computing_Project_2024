@@ -1,64 +1,102 @@
 #include "../common/common.h"
 
-#define NUM_DIGITS 10 // Base-10 for radix sort
+// Function to extract the digit at a specific position
+int get_digit(int number, int position) {
+    return (number / static_cast<int>(std::pow(10, position))) % 10;
+}
 
-// Function prototypes
-int get_digit(int number, int digit_pos);
+// Function to build histogram for current position
+std::vector<int> build_histogram(const std::vector<int>& data, int position) {
+    std::vector<int> histogram(10, 0);
+    for (int number : data) {
+        int digit = get_digit(number, position);
+        histogram[digit]++;
+    }
+    return histogram;
+}
 
-// Main LSD Radix Sort function
-void lsd_radix_sort(std::vector<int>& data, int rank, int size) {
-    int n = data.size();
-    int max_num = *std::max_element(data.begin(), data.end());
-    int max_digit_pos = static_cast<int>(std::log10(max_num)) + 1;
+// Function to perform in-place MSD Radix Sort on a local data segment
+void in_place_msd_radix_sort(std::vector<int>& data, int l, int max_digits) {
+    if (data.size() <= 1 || l >= max_digits) return;
 
-    for (int digit_pos = 0; digit_pos < max_digit_pos; digit_pos++) {
-        std::vector<int> histogram(NUM_DIGITS, 0);
-        std::vector<int> local_histogram(NUM_DIGITS, 0);
+    // Step 1: Build histogram for current digit position
+    std::vector<int> histogram = build_histogram(data, l);
 
-        // Step 1: Build local histogram for each process
-        int start = rank * (n / size);
-        int end = (rank == size - 1) ? n : start + (n / size);
+    // Step 2: Calculate heads and tails for buckets
+    std::vector<int> heads(10, 0), tails(10, 0);
+    tails[0] = histogram[0];
+    for (int i = 1; i < 10; i++) {
+        heads[i] = heads[i - 1] + histogram[i - 1];
+        tails[i] = tails[i - 1] + histogram[i];
+    }
 
-        // Debugging output
-        std::cout << "Rank " << rank << " processing range [" << start << ", " << end << ")" << std::endl;
-
-        for (int i = start; i < end; i++) {
-            int digit = get_digit(data[i], digit_pos);
-            local_histogram[digit]++;
+    // Step 3: Sort elements in place based on the current digit
+    for (int i = 0; i < 10; i++) {
+        while (heads[i] < tails[i]) {
+            int elem = data[heads[i]];
+            int bucket = get_digit(elem, l);
+            if (bucket == i) {
+                heads[i]++;
+            } else {
+                std::swap(data[heads[i]], data[heads[bucket]]);
+                heads[bucket]++;
+            }
         }
+    }
 
-        // Step 2: Combine local histograms into a global histogram
-        MPI_Allreduce(local_histogram.data(), histogram.data(), NUM_DIGITS, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-
-        // Step 3: Compute prefix sum of the global histogram
-        std::vector<int> prefix_sum(NUM_DIGITS, 0);
-        for (int i = 1; i < NUM_DIGITS; i++) {
-            prefix_sum[i] = prefix_sum[i - 1] + histogram[i - 1];
-        }
-
-        // Step 4: Distribute data based on prefix sum
-        std::unique_ptr<int[]> sorted_data(new int[n]);
-        std::unique_ptr<int[]> local_sorted_data(new int[end - start]);
-        std::vector<int> local_count(NUM_DIGITS, 0);
-
-        for (int i = start; i < end; i++) {
-            int digit = get_digit(data[i], digit_pos);
-            int pos = prefix_sum[digit] + local_count[digit]++;
-            local_sorted_data[pos - start] = data[i];
-        }
-
-        MPI_Allgather(local_sorted_data.get(), end - start, MPI_INT, sorted_data.get(), end - start, MPI_INT, MPI_COMM_WORLD);
-
-        // Copy sorted data back to original array
-        for (int i = 0; i < n; i++) {
-            data[i] = sorted_data[i];
+    // Step 4: Recursively sort each bucket if there are further digits to process
+    for (int i = 0; i < 10; i++) {
+        int start = (i == 0) ? 0 : tails[i - 1];
+        int end = tails[i];
+        if (end - start > 1) {
+            std::vector<int> sub_data(data.begin() + start, data.begin() + end);
+            in_place_msd_radix_sort(sub_data, l + 1, max_digits);
+            std::copy(sub_data.begin(), sub_data.end(), data.begin() + start);
         }
     }
 }
 
-int get_digit(int number, int digit_pos) {
-    for (int i = 0; i < digit_pos; i++) {
-        number /= 10;
+int calculateMaxDigits(const std::vector<int>& numbers) {
+    if (numbers.empty()) return 0;
+
+    int max_value = *max_element(numbers.begin(), numbers.end());
+    return max_value > 0 ? static_cast<int>(log10(max_value)) + 1 : 1;
+}
+
+std::vector<int> radixSort(std::vector<int> &arr) {
+    int rank, size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    // Broadcast the total number of elements to all processes
+    int array_size = arr.size();
+    MPI_Bcast(&array_size, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+    // Scatter data to all processes
+    int local_n = array_size / size;
+    std::vector<int> local_data(local_n);
+    MPI_Scatter(arr.data(), local_n, MPI_INT, local_data.data(), local_n, MPI_INT, 0, MPI_COMM_WORLD);
+
+    // Each process performs in-place MSD radix sort on its segment
+    int max_digits = calculateMaxDigits(arr);
+    in_place_msd_radix_sort(local_data, 0, max_digits);
+
+    // Vector to gather data from all processes
+    std::vector<int> sortedData;
+    if(rank == 0) {
+        sortedData.resize(array_size);
     }
-    return number % 10;
+
+    // Gather sorted segments back to the root process
+    MPI_Gather(local_data.data(), local_n, MPI_INT, sortedData.data(), local_n, MPI_INT, 0, MPI_COMM_WORLD);
+
+    // Only the root process performs final merging
+    if (rank == 0) {
+        std::sort(sortedData.begin(), sortedData.end());  // Merge step: final sort
+        std::cout << "Sorted data: ";
+        for (int num : sortedData) std::cout << num << " ";
+        std::cout << std::endl;
+    }
+
+    return sortedData;
 }
