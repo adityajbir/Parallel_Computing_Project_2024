@@ -42,9 +42,17 @@ std::vector<int> generate_array(int arraySize, const DataType dataType) {
     }
 
     std::vector<int> counts(numProcs), displacements(numProcs);
-    for (int i = 0; i < numProcs; ++i) {
-        counts[i] = (i < remainder) ? chunkSize + 1 : chunkSize;
-        displacements[i] = (i > 0) ? displacements[i - 1] + counts[i - 1] : 0;
+    if (dataType == reverseSorted){
+        for (int i = 0; i < numProcs; ++i) {
+            int reverseIndex = numProcs - 1 - i;
+            counts[reverseIndex] = (i < remainder) ? chunkSize + 1 : chunkSize;
+            displacements[reverseIndex] = (i > 0) ? displacements[reverseIndex + 1] + counts[reverseIndex + 1] : 0;
+        }
+    } else {
+        for (int i = 0; i < numProcs; ++i) {
+            counts[i] = (i < remainder) ? chunkSize + 1 : chunkSize;
+            displacements[i] = (i > 0) ? displacements[i - 1] + counts[i - 1] : 0;
+        }
     }
 
     MPI_Gatherv(localDataChunk.data(), localDataChunk.size(), MPI_INT,
