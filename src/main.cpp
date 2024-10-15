@@ -75,7 +75,8 @@ int main(int argc, char** argv) {
     }
 
     // std::vector<int> sortedArr = sampleSort(arr); // Testing sampleSort function
-    std::vector<int> sortedArr = radixSort(arr); // Testing radixSort function
+    // std::vector<int> sortedArr = radixSort(arr); // Testing radixSort function
+    std::vector<int>sortedArr= mpiMergeSort(arr); //Testing mergesort function
 
     if (rank == 0) {
         std::cout << "Sorted Array: " << std::endl;
