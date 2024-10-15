@@ -70,18 +70,49 @@ std::vector<int> radixSort(std::vector<int> &arr) {
 
     // Broadcast the total number of elements to all processes
     int array_size = arr.size();
+
+    CALI_MARK_BEGIN(CALI_COMM);
+    CALI_MARK_BEGIN(CALI_COMM_SMALL);
+
+    CALI_MARK_BEGIN("MPI_Bcast");
     MPI_Bcast(&array_size, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    CALI_MARK_END("MPI_Bcast");
+
+    CALI_MARK_END(CALI_COMM_SMALL);
+    CALI_MARK_END(CALI_COMM);
 
     // Scatter data to all processes
     int local_n = array_size / size;
     std::vector<int> local_data(local_n);
+
+    CALI_MARK_BEGIN(CALI_COMM);
+    CALI_MARK_BEGIN(CALI_COMM_LARGE);
+
+    CALI_MARK_BEGIN("MPI_Scatterv");
     MPI_Scatter(arr.data(), local_n, MPI_INT, local_data.data(), local_n, MPI_INT, 0, MPI_COMM_WORLD);
+    CALI_MARK_END("MPI_Scatterv");
+
+    CALI_MARK_END(CALI_COMM_LARGE);
+    CALI_MARK_END(CALI_COMM);
 
     // Each process performs in-place MSD radix sort on its segment
-    int max_digits = calculateMaxDigits(arr);
+    CALI_MARK_BEGIN(CALI_COMP);
+    CALI_MARK_BEGIN(CALI_COMP_LARGE);
+    int max_digits = calculateMaxDigits(arr); // Get the maximum number of digits in the array.
+    CALI_MARK_END(CALI_COMP_LARGE);
+    CALI_MARK_END(CALI_COMP);
+
+    CALI_MARK_BEGIN(CALI_COMP);
+    CALI_MARK_BEGIN(CALI_COMP_SMALL);
     in_place_msd_radix_sort(local_data, 0, max_digits);
+    CALI_MARK_END(CALI_COMP_LARGE);
+    CALI_MARK_END(CALI_COMP);
 
     // Vector to gather data from all processes
+    CALI_MARK_BEGIN(CALI_COMP);
+    CALI_MARK_BEGIN(CALI_COMP_SMALL);
+
+    CALI_MARK_BEGIN("MPI_Gather");
     std::vector<int> sortedData;
     if(rank == 0) {
         sortedData.resize(array_size);
@@ -89,7 +120,13 @@ std::vector<int> radixSort(std::vector<int> &arr) {
 
     // Gather sorted segments back to the root process
     MPI_Gather(local_data.data(), local_n, MPI_INT, sortedData.data(), local_n, MPI_INT, 0, MPI_COMM_WORLD);
+    CALI_MARK_END("MPI_Gather");
 
+    CALI_MARK_END(CALI_COMP_LARGE);
+    CALI_MARK_END(CALI_COMP);
+
+    CALI_MARK_BEGIN(CALI_COMP);
+    CALI_MARK_BEGIN(CALI_COMP_SMALL);
     // Only the root process performs final merging
     if (rank == 0) {
         std::sort(sortedData.begin(), sortedData.end());  // Merge step: final sort
@@ -97,6 +134,8 @@ std::vector<int> radixSort(std::vector<int> &arr) {
         for (int num : sortedData) std::cout << num << " ";
         std::cout << std::endl;
     }
+    CALI_MARK_END(CALI_COMP_LARGE);
+    CALI_MARK_END(CALI_COMP);
 
     return sortedData;
 }
