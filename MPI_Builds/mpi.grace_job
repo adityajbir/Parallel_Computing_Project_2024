@@ -18,13 +18,19 @@
 ##First Executable Line
 #
 power_of_2=$1
-processes=$2
-input_type=${3:-random}  # Default to "random" if not provided
-alg_type=${4:-sampleSort}  # Default to "sampleSort" if not provided
+processes=$SLURM_NTASKS
+input_type=${2:-random}  # Default to "random" if not provided
+alg_type=${3:-sampleSort}  # Default to "sampleSort" if not provided
 
 module load intel/2020b > /dev/null 2>&1       # load Intel software stack
 module load CMake/3.12.1 > /dev/null 2>&1
 module load GCCcore/8.3.0 > /dev/null 2>&1
+
+# Construct the output filename
+output_file="p${processes}-a_2^${power_of_2}-${input_type}-${alg_type}.txt"
+
+# Redirect stdout and stderr to the output file
+exec > "$output_file" 2>&1
 
 export CALI_CONFIG="spot(output=p${processes}-a_2^${power_of_2}-${input_type}-${alg_type}.cali, time.variance,profile.mpi)"
 mpirun -np $processes ./main_executable $power_of_2 $input_type $alg_type
