@@ -100,9 +100,10 @@ int main(int argc, char** argv) {
     std::vector<int> arr = generate_array(arraySize, inputType);
     CALI_MARK_END(CALI_DATA_INIT_RUNTIME);
 
+    int printSize = std::min(40, arraySize);
     if (rank == 0) {
         std::cout << "Input Array: " << std::endl;
-        for (int i = 0; i < arraySize; i++) {
+        for (int i = 0; i < printSize; i++) {
             std::cout << arr[i] << " ";
         }
         std::cout << std::endl << "#######################################" << std::endl;
@@ -112,7 +113,7 @@ int main(int argc, char** argv) {
 
     if (rank == 0) {
         std::cout << "Sorted Array: " << std::endl;
-        for (int i = 0; i < arraySize; i++) {
+        for (int i = 0; i < printSize; i++) {
             std::cout << sortedArr[i] << " ";
         }
         std::cout << std::endl << "#######################################" << std::endl;
