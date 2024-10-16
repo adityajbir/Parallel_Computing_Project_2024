@@ -1,6 +1,6 @@
 #include "../common/common.h"
 
-std::vector<int> sampleSort(const std::vector<int>& inputArray) {
+std::vector<int> sampleSort(std::vector<int>& inputArray) {
     int rank, size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank); 
     MPI_Comm_size(MPI_COMM_WORLD, &size);  

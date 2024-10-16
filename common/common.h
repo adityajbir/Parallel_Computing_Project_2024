@@ -14,6 +14,7 @@
 #include <limits.h>
 #include <memory>
 #include <cmath> 
+#include <unordered_map>
 
 enum DataType {
     sorted,

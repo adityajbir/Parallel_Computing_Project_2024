@@ -26,7 +26,7 @@ module load intel/2020b > /dev/null 2>&1       # load Intel software stack
 module load CMake/3.12.1 > /dev/null 2>&1
 module load GCCcore/8.3.0 > /dev/null 2>&1
 
-export CALI_CONFIG="spot(output=p${processes}-a_2^${power_of_2}.cali, time.variance,profile.mpi)"
+export CALI_CONFIG="spot(output=p${processes}-a_2^${power_of_2}-${input_type}-${alg_type}.cali, time.variance,profile.mpi)"
 mpirun -np $processes ./main_executable $power_of_2 $input_type $alg_type
 
 squeue -j $SLURM_JOBID

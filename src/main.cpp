@@ -39,14 +39,14 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    int arraySize = std::stoi(argv[1]);
+    int arraySize = std::pow(2, std::stoi(argv[1]));
     std::string inputTypeStr = argv[2];
     std::string algorithmStr = argv[3];
     // Map inputTypeStr to DataType enum
     std::unordered_map<std::string, DataType> inputTypeMap = {
         {"sorted", sorted},
         {"reverseSorted", reverseSorted},
-        {"rands", rands},
+        {"random", rands},
         {"perturbed", perturbed}
     };
 
@@ -66,8 +66,6 @@ int main(int argc, char** argv) {
     std::unordered_map<std::string, std::vector<int>(*)(std::vector<int>&)> algorithmMap = {
         {"sampleSort", sampleSort},
         {"radixSort", radixSort},
-        {"mergeSort", mpiMergeSort},
-
     };
 
     if (algorithmMap.find(algorithmStr) == algorithmMap.end()) {
