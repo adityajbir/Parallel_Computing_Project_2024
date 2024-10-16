@@ -15,6 +15,9 @@
 #include <memory>
 #include <cmath> 
 #include <unordered_map>
+#include <queue>
+#include <functional>
+#include <utility>
 
 enum DataType {
     sorted,
@@ -32,6 +35,7 @@ enum DataType {
 #define CALI_COMP "comp"
 #define CALI_COMP_SMALL "comp_small"
 #define CALI_COMP_LARGE "comp_large"
+
 
 // input data generation
 std::vector<int> generate_array(int size, const DataType dataType);

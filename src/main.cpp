@@ -66,6 +66,7 @@ int main(int argc, char** argv) {
     std::unordered_map<std::string, std::vector<int>(*)(std::vector<int>&)> algorithmMap = {
         {"sampleSort", sampleSort},
         {"radixSort", radixSort},
+        {"mpiMergeSort", mpiMergeSort}
     };
 
     if (algorithmMap.find(algorithmStr) == algorithmMap.end()) {
