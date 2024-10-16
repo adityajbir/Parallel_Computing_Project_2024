@@ -8,7 +8,7 @@ std::vector<int> generate_data_chunk(int start, int end, const DataType dataType
         std::iota(data.rbegin(), data.rend(), start);
     } else if (dataType == rands) {
         std::mt19937 rng(std::random_device{}());
-        std::uniform_int_distribution<int> dist(0, end);
+        std::uniform_int_distribution<int> dist(0, std::numeric_limits<int>::max());
         std::generate(data.begin(), data.end(), [&]() { return dist(rng); });
     } else if (dataType == perturbed) {
         std::iota(data.begin(), data.end(), start);
