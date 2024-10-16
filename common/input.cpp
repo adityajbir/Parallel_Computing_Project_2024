@@ -14,7 +14,7 @@ std::vector<int> generate_data_chunk(int start, int end, const DataType dataType
         std::iota(data.begin(), data.end(), start);
         std::mt19937 rng(std::random_device{}());
         std::uniform_int_distribution<int> dist(0, end);
-        int perturbation = (end - start) * 0.01;
+        int perturbation = std::max(1, static_cast<int>((end - start) * 0.01));        
         for (int i = 0; i < perturbation; ++i) {
             data[dist(rng) % data.size()] = dist(rng);
         }
