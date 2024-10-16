@@ -40,21 +40,56 @@ int main(int argc, char** argv) {
     }
 
     int arraySize = std::stoi(argv[1]);
-    if (argc > 2 && std::stoi(argv[2]) != -1) {
-        arraySize = std::pow(2, std::stoi(argv[2]));
+    std::string inputTypeStr = argv[2];
+    std::string algorithmStr = argv[3];
+    // Map inputTypeStr to DataType enum
+    std::unordered_map<std::string, DataType> inputTypeMap = {
+        {"sorted", sorted},
+        {"reverseSorted", reverseSorted},
+        {"rands", rands},
+        {"perturbed", perturbed}
+    };
+
+    if (inputTypeMap.find(inputTypeStr) == inputTypeMap.end()) {
+        if (rank == 0) {
+            std::cerr << "Invalid input type: " << inputTypeStr << std::endl;
+        }
+        CALI_MARK_BEGIN("MPI_Finalize");
+        MPI_Finalize(); // Finalize MPI before exiting
+        CALI_MARK_END("MPI_Finalize");
+        return 1;
     }
 
+    DataType inputType = inputTypeMap[inputTypeStr];
+
+    // Map algorithmStr to function pointers
+    std::unordered_map<std::string, std::vector<int>(*)(std::vector<int>&)> algorithmMap = {
+        {"sampleSort", sampleSort},
+        {"radixSort", radixSort},
+        {"mergeSort", mpiMergeSort},
+
+    };
+
+    if (algorithmMap.find(algorithmStr) == algorithmMap.end()) {
+        if (rank == 0) {
+            std::cerr << "Invalid algorithm: " << algorithmStr << std::endl;
+        }
+        CALI_MARK_BEGIN("MPI_Finalize");
+        MPI_Finalize(); // Finalize MPI before exiting
+        CALI_MARK_END("MPI_Finalize");
+        return 1;
+    }
+
+    auto algorithmFunc = algorithmMap[algorithmStr];
+
     // Collect remaining metadata
-    std::string algorithm = "Sample Sort"; // Replace with your actual algorithm
-    adiak::value("algorithm", algorithm);
+    adiak::value("algorithm", algorithmStr);
     adiak::value("programming_model", "MPI");
-    std::string data_type = "int";
-    adiak::value("data_type", data_type);
+    adiak::value("data_type", "int");
     int size_of_data_type = sizeof(int);
     adiak::value("size_of_data_type", size_of_data_type);
     adiak::value("input_size", arraySize);
-    std::string input_type = "Random"; // Change based on input data
-    adiak::value("input_type", input_type);
+    adiak::value("input_type", inputTypeStr);
     adiak::value("num_procs", size);
     std::string scalability = "strong"; // or "weak" depending on your experiment
     adiak::value("scalability", scalability);
@@ -63,7 +98,7 @@ int main(int argc, char** argv) {
 
     // Data initialization
     CALI_MARK_BEGIN(CALI_DATA_INIT_RUNTIME);
-    std::vector<int> arr = generate_array(arraySize, rands);
+    std::vector<int> arr = generate_array(arraySize, inputType);
     CALI_MARK_END(CALI_DATA_INIT_RUNTIME);
 
     if (rank == 0) {
@@ -74,9 +109,7 @@ int main(int argc, char** argv) {
         std::cout << std::endl << "#######################################" << std::endl;
     }
 
-    // std::vector<int> sortedArr = sampleSort(arr); // Testing sampleSort function
-    // std::vector<int> sortedArr = radixSort(arr); // Testing radixSort function
-    std::vector<int>sortedArr= mpiMergeSort(arr); //Testing mergesort function
+    std::vector<int>sortedArr= algorithmFunc(arr);
 
     if (rank == 0) {
         std::cout << "Sorted Array: " << std::endl;

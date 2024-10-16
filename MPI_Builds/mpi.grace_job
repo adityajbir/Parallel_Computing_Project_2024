@@ -17,15 +17,16 @@
 #
 ##First Executable Line
 #
-array_size=$1
+power_of_2=$1
 processes=$2
-power_of_2=${3:- -1}  # Default to -1 if not provided
+input_type=${3:-random}  # Default to "random" if not provided
+alg_type=${4:-sampleSort}  # Default to "sampleSort" if not provided
 
 module load intel/2020b > /dev/null 2>&1       # load Intel software stack
 module load CMake/3.12.1 > /dev/null 2>&1
 module load GCCcore/8.3.0 > /dev/null 2>&1
 
-export CALI_CONFIG="spot(output=p${processes}-a${array_size}.cali, time.variance,profile.mpi)"
-mpirun -np $processes ./main_executable $array_size $power_of_2
+export CALI_CONFIG="spot(output=p${processes}-a_2^${power_of_2}.cali, time.variance,profile.mpi)"
+mpirun -np $processes ./main_executable $power_of_2 $input_type $alg_type
 
 squeue -j $SLURM_JOBID
