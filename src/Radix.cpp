@@ -103,7 +103,7 @@ std::vector<int> radixSort(std::vector<int> &arr) {
     CALI_MARK_END(CALI_COMP);
 
     CALI_MARK_BEGIN(CALI_COMP);
-    CALI_MARK_BEGIN(CALI_COMP_SMALL);
+    CALI_MARK_BEGIN(CALI_COMP_LARGE);
     in_place_msd_radix_sort(local_data, 0, max_digits);
     CALI_MARK_END(CALI_COMP_LARGE);
     CALI_MARK_END(CALI_COMP);
@@ -122,7 +122,7 @@ std::vector<int> radixSort(std::vector<int> &arr) {
     MPI_Gather(local_data.data(), local_n, MPI_INT, sortedData.data(), local_n, MPI_INT, 0, MPI_COMM_WORLD);
     CALI_MARK_END("MPI_Gather");
 
-    CALI_MARK_END(CALI_COMP_LARGE);
+    CALI_MARK_END(CALI_COMP_SMALL);
     CALI_MARK_END(CALI_COMP);
 
     CALI_MARK_BEGIN(CALI_COMP);
@@ -130,11 +130,8 @@ std::vector<int> radixSort(std::vector<int> &arr) {
     // Only the root process performs final merging
     if (rank == 0) {
         std::sort(sortedData.begin(), sortedData.end());  // Merge step: final sort
-        std::cout << "Sorted data: ";
-        for (int num : sortedData) std::cout << num << " ";
-        std::cout << std::endl;
     }
-    CALI_MARK_END(CALI_COMP_LARGE);
+    CALI_MARK_END(CALI_COMP_SMALL);
     CALI_MARK_END(CALI_COMP);
 
     return sortedData;
