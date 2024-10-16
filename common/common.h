@@ -26,7 +26,6 @@ enum DataType {
     perturbed
 };
 /* Define Caliper region names using macros */
-#define CALI_MAIN "main"
 #define CALI_DATA_INIT_RUNTIME "data_init_runtime"
 #define CALI_CORRECTNESS_CHECK "correctness_check"
 #define CALI_COMM "comm"
