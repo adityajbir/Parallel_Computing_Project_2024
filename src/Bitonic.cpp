@@ -1,153 +1,245 @@
 #include "../common/common.h"
 
-void merge(const std::vector<int>& a, const std::vector<int>& b, std::vector<int>& result, bool ascending) {
-    size_t i = 0, j = 0, k = 0;
-    size_t n = a.size(), m = b.size();
-    result.resize(n + m);
-    while (i < n && j < m) {
-        if ((a[i] <= b[j]) == ascending)
-            result[k++] = a[i++];
-        else
-            result[k++] = b[j++];
+void compare_low(int j, std::vector<int>& local, int elements_per_proc, int rank, int size) {
+    CALI_MARK_BEGIN(CALI_COMM);
+    int min;
+
+    int partner = rank ^ (1 << j);
+
+    // Send local maximum to partner
+    MPI_Send(&local[elements_per_proc - 1], 1, MPI_INT, partner, 0, MPI_COMM_WORLD);
+
+    // Receive min from partner
+    MPI_Recv(&min, 1, MPI_INT, partner, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+    CALI_MARK_END(CALI_COMM_SMALL);
+
+    // Prepare buffers
+    std::vector<int> buffer_send(elements_per_proc + 1);
+    std::vector<int> buffer_receive(elements_per_proc + 1);
+
+    int send_counter = 0;
+    for (int i = elements_per_proc - 1; i >= 0; i--) {
+        if (local[i] > min) {
+            send_counter++;
+            buffer_send[send_counter] = local[i];
+        } else {
+            break;
+        }
     }
-    while (i < n)
-        result[k++] = a[i++];
-    while (j < m)
-        result[k++] = b[j++];
-    result.resize(k); // Adjust size if there are dummy elements
+
+    CALI_MARK_BEGIN(CALI_COMM_LARGE);
+
+    buffer_send[0] = send_counter;  // First element is the count
+    MPI_Send(buffer_send.data(), send_counter + 1, MPI_INT, partner, 0, MPI_COMM_WORLD);
+
+    MPI_Recv(buffer_receive.data(), elements_per_proc + 1, MPI_INT, partner, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+    CALI_MARK_END(CALI_COMM_LARGE);
+    CALI_MARK_END(CALI_COMM);
+
+    CALI_MARK_BEGIN(CALI_COMP);
+    CALI_MARK_BEGIN(CALI_COMP_SMALL);
+
+    std::vector<int> temp_array = local;  // Copy local array
+
+    int buffer_size = buffer_receive[0];
+    int k = 1;  // Index in buffer_receive
+    int m = 0;  // Index in temp_array
+
+    for (int i = 0; i < elements_per_proc; i++) {
+        if (m < temp_array.size() && (k > buffer_size || temp_array[m] <= buffer_receive[k])) {
+            local[i] = temp_array[m];
+            m++;
+        } else if (k <= buffer_size) {
+            local[i] = buffer_receive[k];
+            k++;
+        }
+    }
+
+    CALI_MARK_END(CALI_COMP_SMALL);
+
+    CALI_MARK_BEGIN(CALI_COMP_LARGE);
+    std::sort(local.begin(), local.end());
+    CALI_MARK_END(CALI_COMP_LARGE);
+    CALI_MARK_END(CALI_COMP);
 }
 
-void keep_data(const std::vector<int>& merged_data, std::vector<int>& local_data, bool keep_low) {
-    size_t n = local_data.size();
-    if (keep_low) {
-        std::copy(merged_data.begin(), merged_data.begin() + n, local_data.begin());
-    } else {
-        std::copy(merged_data.end() - n, merged_data.end(), local_data.begin());
+void compare_high(int j, std::vector<int>& local, int elements_per_proc, int rank, int size) {
+    CALI_MARK_BEGIN(CALI_COMM);
+    int max;
+
+    int partner = rank ^ (1 << j);
+
+    // Receive max from partner
+    MPI_Recv(&max, 1, MPI_INT, partner, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+    // Send local minimum to partner
+    MPI_Send(&local[0], 1, MPI_INT, partner, 0, MPI_COMM_WORLD);
+
+    CALI_MARK_END(CALI_COMM_SMALL);
+
+    std::vector<int> buffer_send(elements_per_proc + 1);
+    std::vector<int> buffer_receive(elements_per_proc + 1);
+
+    int send_counter = 0;
+    for (int i = 0; i < elements_per_proc; i++) {
+        if (local[i] < max) {
+            send_counter++;
+            buffer_send[send_counter] = local[i];
+        } else {
+            break;
+        }
     }
+
+    CALI_MARK_BEGIN(CALI_COMM_LARGE);
+
+    MPI_Recv(buffer_receive.data(), elements_per_proc + 1, MPI_INT, partner, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+    buffer_send[0] = send_counter;
+    MPI_Send(buffer_send.data(), send_counter + 1, MPI_INT, partner, 0, MPI_COMM_WORLD);
+
+    CALI_MARK_END(CALI_COMM_LARGE);
+    CALI_MARK_END(CALI_COMM);
+
+    CALI_MARK_BEGIN(CALI_COMP);
+    CALI_MARK_BEGIN(CALI_COMP_SMALL);
+
+    std::vector<int> temp_array = local;
+
+    int buffer_size = buffer_receive[0];
+    int k = 1;
+    int m = elements_per_proc - 1;
+
+    for (int i = elements_per_proc - 1; i >= 0; i--) {
+        if (m >= 0 && (k > buffer_size || temp_array[m] >= buffer_receive[k])) {
+            local[i] = temp_array[m];
+            m--;
+        } else if (k <= buffer_size) {
+            local[i] = buffer_receive[k];
+            k++;
+        }
+    }
+
+    CALI_MARK_END(CALI_COMP_SMALL);
+
+    CALI_MARK_BEGIN(CALI_COMP_LARGE);
+    std::sort(local.begin(), local.end());
+    CALI_MARK_END(CALI_COMP_LARGE);
+    CALI_MARK_END(CALI_COMP);
 }
 
-std::vector<int> BitonicSort()(std::vector<int> arr) {
-    int rank, P; // Rank and num processes
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank); 
-    MPI_Comm_size(MPI_COMM_WORLD, &P);
+std::vector<int> bitonicSort(std::vector<int>& inputArray) {
+    int rank, size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-    int N_padded;
-    std::vector<int> padded_arr;
+    // Ensure the number of processes is a power of 2
+    if ((size & (size - 1)) != 0) {
+        if (rank == 0) {
+            std::cerr << "Number of processes must be a power of 2 for Bitonic sort." << std::endl;
+        }
+        MPI_Finalize();
+        exit(1);
+    }
+
+    int N = 0;
     if (rank == 0) {
-        N_padded = pow(2, ceil(log2(arr.size())));
-
-        std::vector<int> padded_arr = arr;
-        padded_arr.resize(N_padded, INT_MAX);    
+        N = inputArray.size();
     }
 
-    // Broadcast the total number of elements to all processes
-    MPI_Bcast(&N_padded, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    // Broadcast N to all processes
+    CALI_MARK_BEGIN(CALI_COMM);
+    CALI_MARK_BEGIN(CALI_COMM_SMALL);
+    MPI_Bcast(&N, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    CALI_MARK_END(CALI_COMM_SMALL);
+    CALI_MARK_END(CALI_COMM);
 
-    int base_count = N_padded / P;
-    int remainder = N_padded % P;
+    // Compute elements_per_proc and prepare for scattering
+    int base_count = N / size;
+    int remainder = N % size;
 
-    // Calculate the displacements and counts for MPI_Scatterv
-    std::vector<int> scatterCounts(P);
-    std::vector<int> scatterDisplacements(P);
+    std::vector<int> scatterSendCounts(size);
+    std::vector<int> scatterSendDispls(size);
     int sum = 0;
-    for (int i = 0; i < P; i++) {
-        scatterCounts[i] = base_count + (i < remainder ? 1 : 0);
-        scatterDisplacements[i] = sum;
-        sum += scatterCounts[i];
+    for (int i = 0; i < size; ++i) {
+        scatterSendCounts[i] = base_count + (i < remainder ? 1 : 0);
+        scatterSendDispls[i] = sum;
+        sum += scatterSendCounts[i];
     }
 
-    // Scatter data to all processes
-    int localSize = scatterCounts[rank];
-    std::vector<int> local_data(localSize);
+    int elements_per_proc = scatterSendCounts[rank];
+    std::vector<int> local(elements_per_proc);
+
+    // Distribute data among processes
+    CALI_MARK_BEGIN(CALI_COMM);
+    CALI_MARK_BEGIN(CALI_COMM_LARGE);
     MPI_Scatterv(
-        rank == 0 ? padded_arr.data() : nullptr,
-        scatterCounts.data(),
-        scatterDisplacements.data(),
+        rank == 0 ? inputArray.data() : nullptr,
+        scatterSendCounts.data(),
+        scatterSendDispls.data(),
         MPI_INT,
-        local_data.data(),
-        localSize,
+        local.data(),
+        elements_per_proc,
         MPI_INT,
         0,
         MPI_COMM_WORLD
     );
-    
-    // Sort local data
-    sort(local_data.begin(), local_data.end());
+    CALI_MARK_END(CALI_COMM_LARGE);
+    CALI_MARK_END(CALI_COMM);
 
-    // Start Bitonic mergesort
-    int max_level = static_cast<int>(ceil(log2(P)));
-    for (int k = 1; k <= max_level; ++k) {
-        for (int j = k; j > 0; --j) {
-            int distance = 1 << (j - 1);
-            int partner = rank ^ distance;
+    // Local sort
+    CALI_MARK_BEGIN(CALI_COMP);
+    CALI_MARK_BEGIN(CALI_COMP_LARGE);
+    std::sort(local.begin(), local.end());
+    CALI_MARK_END(CALI_COMP_LARGE);
+    CALI_MARK_END(CALI_COMP);
 
-            if (parner >= P) { continue; } // Skip non-existen partners
+    // Bitonic merge
+    int dimension = static_cast<int>(std::log2(size));
 
-            // Determine the sort direction
-            bool ascending = ((my_rank >> (k - 1)) & 1) == 0;
-
-            // Exchange data with partner
-            std::vector<int> partner_data(localSize);   
-
-            // Non-blocking send and receive to prevent deadlocks
-            MPI_Request requests[2];
-            MPI_Isend(local_data.data(), localSize, MPI_INT, partner, 0, MPI_COMM_WORLD, &requests[0]);
-            MPI_Irecv(partner_data.data(), localSize, MPI_INT, partner, 0, MPI_COMM_WORLD, &requests[1]);
-            MPI_Waitall(2, requests, MPI_STATUSES_IGNORE);
-
-            // Merge local data and partner data
-            std::vector<int> merged_data;
-            merge(local_data, partner_data, merged_data, ascending);
-
-            // Keep either the lower or upper half based on the sort direction
-            bool keep_low = (my rank < parnter) == ascending;
-            keep_data(merged_data, local_data, keep_low);
-
+    for (int i = 0; i < dimension; i++) {
+        for (int j = i; j >= 0; j--) {
+            if (((rank >> (i + 1)) % 2 == 0 && (rank >> j) % 2 == 0) ||
+                ((rank >> (i + 1)) % 2 != 0 && (rank >> j) % 2 != 0)) {
+                compare_low(j, local, elements_per_proc, rank, size);
+            } else {
+                compare_high(j, local, elements_per_proc, rank, size);
+            }
         }
     }
 
-    // Gather the sorted data backs to process 0
-    std::vector<int> sortedArr;
-    if (my_rank == 0) {
-        // Prepare receive counts and displacements for MPI_Gatherv
-        std::vector<int> recv_counts(num_procs);
-        std::vector<int> displacements(num_procs);
-        int sum = 0;
-        for (int i = 0; i < num_procs; ++i) {
-            recv_counts[i] = base + (i < remainder ? 1 : 0);
-            displacements[i] = sum;
-            sum += recv_counts[i];
-        }
+    // Gather sorted data
+    std::vector<int> gatherRecvCounts = scatterSendCounts;
+    std::vector<int> gatherRecvDispls = scatterSendDispls;
 
-        sortedArr.resize(sum);
-        MPI_Gatherv(
-            local_data.data(),
-            scatterCounts[rank],
-            MPI_INIT,
-            sortedArr.data(),
-            recv_counts.data(),
-            displacements.data(),
-            MPI_INIT,
-            0,
-            MPI_COMM_WORLD
-        );
-        sortedArr.resize(arr.size());
-    } 
-    else {
-        // Non-root processes send their data
-        MPI_Gatherv(
-            local_data.data(),
-            scatterCounts[rank],
-            MPI_INIT,
-            nullptr,
-            nullptr,
-            nullptr,
-            MPI_INIT,
-            0,
-            MPI_COMM_WORLD
-        );
+    std::vector<int> sortedData;
+    if (rank == 0) {
+        sortedData.resize(N);
     }
-    // Return the sorted array on rank 0; empty array on other ranks
-    return sortedArr;    
+
+    CALI_MARK_BEGIN(CALI_COMM);
+    CALI_MARK_BEGIN(CALI_COMM_LARGE);
+
+    MPI_Gatherv(
+        local.data(),
+        elements_per_proc,
+        MPI_INT,
+        sortedData.data(),
+        gatherRecvCounts.data(),
+        gatherRecvDispls.data(),
+        MPI_INT,
+        0,
+        MPI_COMM_WORLD
+    );
+
+    CALI_MARK_END(CALI_COMM_LARGE);
+    CALI_MARK_END(CALI_COMM);
+
+    // Return sorted data on rank 0
+    if (rank == 0) {
+        return sortedData;
+    } else {
+        return std::vector<int>();
+    }
 }
-

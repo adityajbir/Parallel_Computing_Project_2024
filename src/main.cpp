@@ -64,7 +64,8 @@ int main(int argc, char** argv) {
     std::unordered_map<std::string, std::vector<int>(*)(std::vector<int>&)> algorithmMap = {
         {"sampleSort", sampleSort},
         {"radixSort", radixSort},
-        {"mpiMergeSort", mpiMergeSort}
+        {"mpiMergeSort", mpiMergeSort},
+        {"bitonicSort", bitonicSort}
     };
 
     if (algorithmMap.find(algorithmStr) == algorithmMap.end()) {
@@ -96,6 +97,7 @@ int main(int argc, char** argv) {
     // Data initialization
     CALI_MARK_BEGIN(CALI_DATA_INIT_RUNTIME);
     std::vector<int> arr = generate_array(arraySize, inputType);
+    // std::vector<int> arr = {0, 0, 1, 0, 0, 2, 2, 8};
     CALI_MARK_END(CALI_DATA_INIT_RUNTIME);
 
     int printSize = std::min(40, arraySize);

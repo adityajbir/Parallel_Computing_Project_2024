@@ -48,7 +48,7 @@ local_data = GetLocalData(rank, N_local)
 
 // Perform local bitonic sort on each processor
 // Bitonic sort on local data
-BitonicSort(local_data, N_local)
+bitonicSort(local_data, N_local)
 
 // Step 2: Bitonic Merge Across Processors
 // Start the parallel merging using the bitonic merge network
@@ -83,8 +83,8 @@ sorted_data = MPI_Gather(local_data, N_local, MPI_COMM_WORLD)
 // Finalize MPI
 MPI_Finalize()
 
-// BitonicSort function: Sorts a sequence using bitonic sorting network
-function BitonicSort(data, N_local):
+// bitonicSort function: Sorts a sequence using bitonic sorting network
+function bitonicSort(data, N_local):
     for k in 2 to N_local step *= 2:
         for j = k/2 down to 1:
             for i in 0 to N_local - 1:

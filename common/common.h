@@ -44,6 +44,7 @@ std::vector<int> generate_data_chunk(int start, int end, const DataType dataType
 std::vector<int> sampleSort(std::vector<int>& inputArray);
 std::vector<int> radixSort(std::vector<int>& inputArray);
 std::vector<int> mpiMergeSort(std::vector<int>& inputArray);
+std::vector<int> bitonicSort(std::vector<int>& inputArray);
 
 // sort verification
 bool sortVerify(const std::vector<int>& inputArray);
