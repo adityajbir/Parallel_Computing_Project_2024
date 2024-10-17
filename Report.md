@@ -18,7 +18,7 @@
 
 ### 2a. Brief project description (what algorithms will you be comparing and on what architectures)
 - Architecture: For all the algorithms below we will be implementing them with an MPI architecture
-- Bitonic Sort: This algorithm requires the size of the input to be a power of 2, it creates a bitonic sequence from the array before making comparisons and returning a sorted array. The runtime of this algorithm is N/P log^2(N/P), where P is the number of processors. This algorithm will be implemented by Juan Carrasco 
+- Bitonic Sort (Juan Carrasco): The provided code implements a parallel Bitonic Sort algorithm using MPI for distributed computing. The algorithm begins by ensuring the number of processes is a power of 2 and then distributes the input array among the processes. Each process sorts its local chunk of data, and the algorithm performs a series of comparisons and exchanges between processes to create a bitonic sequence and sort it. The compare_low and compare_high functions handle the comparisons and exchanges to ensure the data is sorted in ascending or descending order, respectively. Finally, the sorted chunks are gathered back to the root process to form the final sorted array. The code also includes Caliper markers for performance profiling. 
 
 - Sample Sort (Eyad Nazir): Sample sort is a parallel sorting algorithm that divides the input array into smaller subarrays, sorts them independently, and merges them back together. The algorithm begins with the root process determining the total number of elements in the input array and broadcasting this information to all processes using `MPI_Bcast`. The input array is then divided into smaller subarrays, which are distributed to different processes using `MPI_Scatterv`. Each process independently sorts its local subarray. Next, each process selects a set of local samples from its sorted subarray, with the number of samples equal to the number of processes minus one. The sizes of these local samples are gathered at the root process using `MPI_Gather`, and the root process then gathers all the local samples from each process using `MPI_Gatherv`. The root process sorts the gathered samples and selects splitters to partition the data, which are then broadcasted to all processes using `MPI_Bcast`. Each process partitions its local subarray based on the splitters, creating buckets of data to be sent to the corresponding processes. The sizes of these buckets are exchanged among all processes using `MPI_Alltoall`, and the data in the buckets is exchanged using `MPI_Alltoallv`. Each process then sorts the data it received from other processes. Finally, the sizes of the sorted subarrays are gathered at the root process using `MPI_Gather`, and the root process gathers all the sorted subarrays from each process using `MPI_Gatherv`. The root process returns the fully sorted array, while other processes return an empty array. This approach leverages the computational power of multiple processes to efficiently sort large datasets in parallel.
 
@@ -31,75 +31,165 @@
 
 - Bitonic Sort
 ```python
-// Pseudocode for Parallel Bitonic Sort using MPI
-
-// Initialize MPI environment
+// Initialize MPI
 MPI_Init()
+
+// Get the rank and size of the processes
 rank = MPI_Comm_rank(MPI_COMM_WORLD)
-size = MPI_Comm_size(MPI_COMM_WORLD)
+P = MPI_Comm_size(MPI_COMM_WORLD)
 
-// N is the total number of elements to sort
-// P is the number of processors (P = size)
-N_local = N / P   // Divide data evenly among processors
+// Ensure the number of processes is a power of 2
+if (P is not a power of 2):
+    if (rank == 0):
+        print "Number of processes must be a power of 2 for Bitonic sort."
+    MPI_Finalize()
+    exit(1)
 
-// Step 1: Local Sorting
-// Generate or receive local data for each process
-local_data = GetLocalData(rank, N_local)
+// If the process is the root process (rank 0)
+if (rank == 0):
+    // Get the size of the input array
+    N = size of inputArray
 
-// Perform local bitonic sort on each processor
-// Bitonic sort on local data
-bitonicSort(local_data, N_local)
+// Broadcast N to all processes
+MPI_Bcast(N, 1, MPI_INT, 0, MPI_COMM_WORLD)
 
-// Step 2: Bitonic Merge Across Processors
-// Start the parallel merging using the bitonic merge network
-// Phase 1: Up-sweep phase
-for stage in 1 to log2(P):
-    for step in 0 to log2(N_local):
-        partner = rank XOR 2^(stage - 1)  // Determine partner processor
+// Compute local size and prepare for scattering
+base_count = N / P
+remainder = N % P
+scatterSendCounts = [base_count + (i < remainder ? 1 : 0) for i in 0 to P-1]
+scatterSendDispls = [sum(scatterSendCounts[0:i]) for i in 0 to P]
 
-        // Communicate with the partner process
-        MPI_Sendrecv(local_data, N_local, partner)
-        
-        // Perform local comparison and merge
-        if (rank < partner):
-            // Merge for increasing order
-            BitonicMerge(local_data, received_data, "ASCENDING")
+// Scatter the input array to all processes
+local_size = scatterSendCounts[rank]
+local_data = new array of size local_size
+MPI_Scatterv(inputArray, scatterSendCounts, scatterSendDispls, MPI_INT, local_data, local_size, MPI_INT, 0, MPI_COMM_WORLD)
+
+// Sort local data
+sort(local_data)
+
+// Bitonic merge network
+dimension = log2(P)
+for i in 0 to dimension-1:
+    for j in i down to 0:
+        partner = rank XOR 2^j
+        if (partner < 0 or partner >= P):
+            continue
+
+        // Send and receive data with partner
+        partner_data = new array of size scatterSendCounts[partner]
+        MPI_Sendrecv(local_data, local_size, MPI_INT, partner, 0, partner_data, scatterSendCounts[partner], MPI_INT, partner, 0, MPI_COMM_WORLD)
+
+        // Determine sort direction
+        ascending = ((rank >> (i + 1)) % 2 == 0)
+
+        // Reverse data if necessary
+        if (!ascending):
+            reverse(local_data)
+            reverse(partner_data)
+
+        // Compare and keep either the lower or upper half based on rank and distance
+        if (ascending):
+            compare_low(j, local_data, local_size, rank, P)
         else:
-            // Merge for decreasing order
-            BitonicMerge(local_data, received_data, "DESCENDING")
+            compare_high(j, local_data, local_size, rank, P)
 
-// Step 3: Global Communication and Final Sort
-// Continue merging until the entire sequence is sorted
-for stage in 1 to log2(N):
-    step = 2^stage
-    for i in 0 to N_local - 1:
-        // Compare and merge elements within each local block
-        if (i % step == 0):
-            BitonicMerge(local_data[i:i+step], "ASCENDING")
-
-// Step 4: Gather the results from all processors
-sorted_data = MPI_Gather(local_data, N_local, MPI_COMM_WORLD)
+// Gather sorted data back to the root process
+sorted_data = new array of size N if rank == 0 else null
+MPI_Gatherv(local_data, local_size, MPI_INT, sorted_data, scatterSendCounts, scatterSendDispls, MPI_INT, 0, MPI_COMM_WORLD)
 
 // Finalize MPI
 MPI_Finalize()
 
-// bitonicSort function: Sorts a sequence using bitonic sorting network
-function bitonicSort(data, N_local):
-    for k in 2 to N_local step *= 2:
-        for j = k/2 down to 1:
-            for i in 0 to N_local - 1:
-                if ((i & k) == 0):
-                    CompareAndSwap(data[i], data[i+j], "ASCENDING")
-                else:
-                    CompareAndSwap(data[i], data[i+j], "DESCENDING")
+// Function to compare and swap elements for increasing order
+function compare_low(j, local, local_size, rank, size):
+    partner = rank XOR 2^j
 
-// BitonicMerge function: Merges two sorted sequences
-function BitonicMerge(data, received_data, order):
-    for i = 0 to N_local - 1:
-        if (order == "ASCENDING" and data[i] > received_data[i]):
-            Swap(data[i], received_data[i])
-        else if (order == "DESCENDING" and data[i] < received_data[i]):
-            Swap(data[i], received_data[i])
+    // Send local maximum to partner
+    MPI_Send(local[local_size - 1], 1, MPI_INT, partner, 0, MPI_COMM_WORLD)
+
+    // Receive min from partner
+    min = MPI_Recv(1, MPI_INT, partner, 0, MPI_COMM_WORLD)
+
+    // Initialize send and receive buffers
+    buffer_send = new array of size local_size + 1
+    buffer_receive = new array of size local_size + 1
+
+    // Fill send buffer with elements greater than min
+    send_counter = 0
+    for i in local_size - 1 down to 0:
+        if (local[i] > min):
+            send_counter++
+            buffer_send[send_counter] = local[i]
+        else:
+            break
+
+    buffer_send[0] = send_counter  // First element is the count
+    MPI_Send(buffer_send, send_counter + 1, MPI_INT, partner, 0, MPI_COMM_WORLD)
+
+    // Receive buffer from partner
+    MPI_Recv(buffer_receive, local_size + 1, MPI_INT, partner, 0, MPI_COMM_WORLD)
+
+    // Merge local data and received buffer
+    temp_array = local
+    buffer_size = buffer_receive[0]
+    k = 1  // Index in buffer_receive
+    m = 0  // Index in temp_array
+
+    for i in 0 to local_size - 1:
+        if (m < temp_array.size and (k > buffer_size or temp_array[m] <= buffer_receive[k])):
+            local[i] = temp_array[m]
+            m++
+        else if (k <= buffer_size):
+            local[i] = buffer_receive[k]
+            k++
+
+    // Sort local data
+    sort(local)
+
+// Function to compare and swap elements for decreasing order
+function compare_high(j, local, local_size, rank, size):
+    partner = rank XOR 2^j
+
+    // Receive max from partner
+    max = MPI_Recv(1, MPI_INT, partner, 0, MPI_COMM_WORLD)
+
+    // Send local minimum to partner
+    MPI_Send(local[0], 1, MPI_INT, partner, 0, MPI_COMM_WORLD)
+
+    // Initialize send and receive buffers
+    buffer_send = new array of size local_size + 1
+    buffer_receive = new array of size local_size + 1
+
+    // Fill send buffer with elements less than max
+    send_counter = 0
+    for i in 0 to local_size - 1:
+        if (local[i] < max):
+            send_counter++
+            buffer_send[send_counter] = local[i]
+        else:
+            break
+
+    MPI_Recv(buffer_receive, local_size + 1, MPI_INT, partner, 0, MPI_COMM_WORLD)
+
+    buffer_send[0] = send_counter
+    MPI_Send(buffer_send, send_counter + 1, MPI_INT, partner, 0, MPI_COMM_WORLD)
+
+    // Merge local data and received buffer
+    temp_array = local
+    buffer_size = buffer_receive[0]
+    k = 1
+    m = local_size - 1
+
+    for i in local_size - 1 down to 0:
+        if (m >= 0 and (k > buffer_size or temp_array[m] >= buffer_receive[k])):
+            local[i] = temp_array[m]
+            m--
+        else if (k <= buffer_size):
+            local[i] = buffer_receive[k]
+            k++
+
+    // Sort local data
+    sort(local)
 
 ```
 - Sample Sort
