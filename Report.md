@@ -496,11 +496,33 @@ CALI_MARK_END("comp");
 
 ## **Bitonic Sort**:
 ```
-
+116.515 main
+├─ 0.000 MPI_Init
+├─ 0.000 MPI_Comm_rank
+├─ 0.000 MPI_Comm_size
+├─ 7.969 data_init_runtime
+│  └─ 0.895 MPI_Gatherv
+├─ 1.142 comm
+│  ├─ 0.081 comm_small
+│  │  └─ 0.081 MPI_Bcast
+│  └─ 1.061 comm_large
+│     ├─ 0.131 MPI_Scatterv
+│     └─ 0.930 MPI_Gatherv
+├─ 105.875 comp
+│  └─ 105.875 comp_large
+│     ├─ 0.125 MPI_Send
+│     └─ 0.647 MPI_Recv
+├─ 0.754 correctness_check
+│  ├─ 0.049 MPI_Bcast
+│  ├─ 0.131 MPI_Scatterv
+│  ├─ 0.000 MPI_Send
+│  ├─ 0.027 MPI_Recv
+│  └─ 0.028 MPI_Allreduce
+├─ 0.000 MPI_Finalize
+├─ 0.000 MPI_Initialized
+├─ 0.000 MPI_Finalized
+└─ 0.001 MPI_Comm_dup
 ```
-
-
-
 
 ### 3b. Collect Metadata
 

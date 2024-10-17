@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Report.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="csce-435-group-project">CSCE 435 Group project</h1>
+<h2 id="0-group-number-2">0. Group number: 2</h2>
+<h2 id="1-group-members">1. Group members:</h2>
+<ol>
+<li>First: Aditya Biradar (Merge Sort)</li>
+<li>Second: Eyad Nazir</li>
+<li>Third: Eduardo Alvarez Hernandez</li>
+<li>Fourth: Juan Carrasco</li>
+</ol>
+<h3 id="1a-method-of-communication">1a. Method of Communication:</h3>
+<ul>
+<li>We will use normal phone messaging as our method of coomunication for this project</li>
+</ul>
+<h2 id="2-project-topic-eg-parallel-sorting-algorithms">2. Project topic (e.g., parallel sorting algorithms)</h2>
+<ul>
+<li>For this project, we will be implementing various sorting algorithms for parallel computing and do a comparitive analysis of the algorithms to identify pros and cons of each algorithm.</li>
+</ul>
+<h3 id="2a-brief-project-description-what-algorithms-will-you-be-comparing-and-on-what-architectures">2a. Brief project description (what algorithms will you be comparing and on what architectures)</h3>
+<ul>
+<li>
+<p>Architecture: For all the algorithms below we will be implementing them with an MPI architecture</p>
+</li>
+<li>
+<p>Bitonic Sort: This algorithm requires the size of the input to be a power of 2, it creates a bitonic sequence from the array before making comparisons and returning a sorted array. The runtime of this algorithm is N/P log^2(N/P), where P is the number of processors. This algorithm will be implemented by Juan Carrasco</p>
+</li>
+<li>
+<p>Sample Sort (Eyad Nazir): Sample sort is a parallel sorting algorithm that divides the input array into smaller subarrays, sorts them independently, and merges them back together. The algorithm begins with the root process determining the total number of elements in the input array and broadcasting this information to all processes using <code>MPI_Bcast</code>. The input array is then divided into smaller subarrays, which are distributed to different processes using <code>MPI_Scatterv</code>. Each process independently sorts its local subarray. Next, each process selects a set of local samples from its sorted subarray, with the number of samples equal to the number of processes minus one. The sizes of these local samples are gathered at the root process using <code>MPI_Gather</code>, and the root process then gathers all the local samples from each process using <code>MPI_Gatherv</code>. The root process sorts the gathered samples and selects splitters to partition the data, which are then broadcasted to all processes using <code>MPI_Bcast</code>. Each process partitions its local subarray based on the splitters, creating buckets of data to be sent to the corresponding processes. The sizes of these buckets are exchanged among all processes using <code>MPI_Alltoall</code>, and the data in the buckets is exchanged using <code>MPI_Alltoallv</code>. Each process then sorts the data it received from other processes. Finally, the sizes of the sorted subarrays are gathered at the root process using <code>MPI_Gather</code>, and the root process gathers all the sorted subarrays from each process using <code>MPI_Gatherv</code>. The root process returns the fully sorted array, while other processes return an empty array. This approach leverages the computational power of multiple processes to efficiently sort large datasets in parallel.</p>
+</li>
+<li>
+<p>Merge Sort (Aditya Biradar): At its base the merge sort is considered a recursive algorithm, and usually has a runtime of n log(n). In this assignment we will be paralleizing this algorithm.</p>
+</li>
+<li>
+<p>Radix Sort (Eduardo Alvarez Hernandez): Radix sort is a non-comparative sorting algorithm that processes individual digits of the numbers in a given list, sorting them based on place value. The algorithm begins by determining the maximum number of digits in the largest number in the array. This information is used to guide the sorting process. The root process broadcasts the total number of elements in the array to all processes using <code>MPI_Bcast</code>. The array is then divided into smaller segments, which are distributed to different processes using <code>MPI_Scatter</code>. Each process performs an in-place Most Significant Digit (MSD) radix sort on its local segment. This involves building a histogram for the current digit position, calculating the heads and tails for buckets, and sorting elements in place based on the current digit. The process is repeated recursively for each digit position until the entire segment is sorted. The maximum number of digits is calculated using the <code>calculateMaxDigits</code> function, which determines the number of digits in the largest number in the array. Once the local segments are sorted, the sizes of the sorted segments are gathered at the root process using <code>MPI_Gather</code>. The root process then gathers all the sorted segments from each process using <code>MPI_Gatherv</code>. Finally, the root process performs a final merge step by sorting the gathered segments to produce the fully sorted array. This approach leverages the computational power of multiple processes to efficiently sort large datasets in parallel, with a typical runtime of O(d*(n + k)), where d is the number of digits in the largest number, n is the number of elements, and k is the range of digits.</p>
+</li>
+</ul>
+<h3 id="2b-pseudocode-for-each-parallel-algorithm">2b. Pseudocode for each parallel algorithm</h3>
+<ul>
+<li>
+<p>For MPI programs, include MPI calls you will use to coordinate between processes</p>
+</li>
+<li>
+<p>Bitonic Sort</p>
+</li>
+</ul>
+<pre class="hljs"><code><div>// Pseudocode <span class="hljs-keyword">for</span> Parallel Bitonic Sort using MPI
+
+// Initialize MPI environment
+MPI_Init()
+rank = MPI_Comm_rank(MPI_COMM_WORLD)
+size = MPI_Comm_size(MPI_COMM_WORLD)
+
+// N <span class="hljs-keyword">is</span> the total number of elements to sort
+// P <span class="hljs-keyword">is</span> the number of processors (P = size)
+N_local = N / P   // Divide data evenly among processors
+
+// Step <span class="hljs-number">1</span>: Local Sorting
+// Generate <span class="hljs-keyword">or</span> receive local data <span class="hljs-keyword">for</span> each process
+local_data = GetLocalData(rank, N_local)
+
+// Perform local bitonic sort on each processor
+// Bitonic sort on local data
+bitonicSort(local_data, N_local)
+
+// Step <span class="hljs-number">2</span>: Bitonic Merge Across Processors
+// Start the parallel merging using the bitonic merge network
+// Phase <span class="hljs-number">1</span>: Up-sweep phase
+<span class="hljs-keyword">for</span> stage <span class="hljs-keyword">in</span> <span class="hljs-number">1</span> to log2(P):
+    <span class="hljs-keyword">for</span> step <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> to log2(N_local):
+        partner = rank XOR <span class="hljs-number">2</span>^(stage - <span class="hljs-number">1</span>)  // Determine partner processor
+
+        // Communicate <span class="hljs-keyword">with</span> the partner process
+        MPI_Sendrecv(local_data, N_local, partner)
+        
+        // Perform local comparison <span class="hljs-keyword">and</span> merge
+        <span class="hljs-keyword">if</span> (rank &lt; partner):
+            // Merge <span class="hljs-keyword">for</span> increasing order
+            BitonicMerge(local_data, received_data, <span class="hljs-string">"ASCENDING"</span>)
+        <span class="hljs-keyword">else</span>:
+            // Merge <span class="hljs-keyword">for</span> decreasing order
+            BitonicMerge(local_data, received_data, <span class="hljs-string">"DESCENDING"</span>)
+
+// Step <span class="hljs-number">3</span>: Global Communication <span class="hljs-keyword">and</span> Final Sort
+// Continue merging until the entire sequence <span class="hljs-keyword">is</span> sorted
+<span class="hljs-keyword">for</span> stage <span class="hljs-keyword">in</span> <span class="hljs-number">1</span> to log2(N):
+    step = <span class="hljs-number">2</span>^stage
+    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> to N_local - <span class="hljs-number">1</span>:
+        // Compare <span class="hljs-keyword">and</span> merge elements within each local block
+        <span class="hljs-keyword">if</span> (i % step == <span class="hljs-number">0</span>):
+            BitonicMerge(local_data[i:i+step], <span class="hljs-string">"ASCENDING"</span>)
+
+// Step <span class="hljs-number">4</span>: Gather the results <span class="hljs-keyword">from</span> all processors
+sorted_data = MPI_Gather(local_data, N_local, MPI_COMM_WORLD)
+
+// Finalize MPI
+MPI_Finalize()
+
+// bitonicSort function: Sorts a sequence using bitonic sorting network
+function bitonicSort(data, N_local):
+    <span class="hljs-keyword">for</span> k <span class="hljs-keyword">in</span> <span class="hljs-number">2</span> to N_local step *= <span class="hljs-number">2</span>:
+        <span class="hljs-keyword">for</span> j = k/<span class="hljs-number">2</span> down to <span class="hljs-number">1</span>:
+            <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> to N_local - <span class="hljs-number">1</span>:
+                <span class="hljs-keyword">if</span> ((i &amp; k) == <span class="hljs-number">0</span>):
+                    CompareAndSwap(data[i], data[i+j], <span class="hljs-string">"ASCENDING"</span>)
+                <span class="hljs-keyword">else</span>:
+                    CompareAndSwap(data[i], data[i+j], <span class="hljs-string">"DESCENDING"</span>)
+
+// BitonicMerge function: Merges two sorted sequences
+function BitonicMerge(data, received_data, order):
+    <span class="hljs-keyword">for</span> i = <span class="hljs-number">0</span> to N_local - <span class="hljs-number">1</span>:
+        <span class="hljs-keyword">if</span> (order == <span class="hljs-string">"ASCENDING"</span> <span class="hljs-keyword">and</span> data[i] &gt; received_data[i]):
+            Swap(data[i], received_data[i])
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (order == <span class="hljs-string">"DESCENDING"</span> <span class="hljs-keyword">and</span> data[i] &lt; received_data[i]):
+            Swap(data[i], received_data[i])
+
+</div></code></pre>
+<ul>
+<li>Sample Sort</li>
+</ul>
+<pre class="hljs"><code><div>function sampleSort():
+    <span class="hljs-comment"># Step 1: Initialize MPI</span>
+    MPI.Init()
+    rank = MPI.Comm_rank()        <span class="hljs-comment"># Get process rank</span>
+    size = MPI.Comm_size()        <span class="hljs-comment"># Get number of processes</span>
+
+    <span class="hljs-comment"># Step 2: Root generates data</span>
+    <span class="hljs-keyword">if</span> rank == <span class="hljs-number">0</span>:
+        data = generate_data()    <span class="hljs-comment"># Root generates full data set</span>
+
+    <span class="hljs-comment"># Step 3: Calculate send counts and displacements (only root)</span>
+    <span class="hljs-keyword">if</span> rank == <span class="hljs-number">0</span>:
+        base_count = len(data) // size
+        remainder = len(data) % size
+        send_counts = [base_count + (<span class="hljs-number">1</span> <span class="hljs-keyword">if</span> i &lt; remainder <span class="hljs-keyword">else</span> <span class="hljs-number">0</span>) <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> range(size)]
+        send_displs = [sum(send_counts[:i]) <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> range(size)]
+
+    <span class="hljs-comment"># Step 4: Broadcast send counts</span>
+    send_counts = MPI.Bcast(send_counts)
+
+    <span class="hljs-comment"># Step 5: Allocate space for local data</span>
+    local_data = allocate_array(send_counts[rank])  <span class="hljs-comment"># Each process gets its portion</span>
+
+    <span class="hljs-comment"># Step 6: Scatter data to all processes</span>
+    MPI.Scatterv(data, local_data)
+
+    <span class="hljs-comment"># Step 7: Sort local data</span>
+    local_data.sort()
+
+    <span class="hljs-comment"># Step 8: Select local samples</span>
+    sample_gap = len(local_data) // (size - <span class="hljs-number">1</span>)
+    local_samples = [local_data[i * sample_gap] <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> range(<span class="hljs-number">1</span>, size)]
+
+    <span class="hljs-comment"># Step 9: Gather samples at root</span>
+    all_samples = MPI.Gather(local_samples)
+
+    <span class="hljs-comment"># Step 10: Root chooses splitters</span>
+    <span class="hljs-keyword">if</span> rank == <span class="hljs-number">0</span>:
+        all_samples.sort()
+        splitters = [all_samples[i * (size - <span class="hljs-number">1</span>)] <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> range(<span class="hljs-number">1</span>, size)]
+
+    <span class="hljs-comment"># Step 11: Broadcast splitters</span>
+    splitters = MPI.Bcast(splitters)
+
+    <span class="hljs-comment"># Step 12: Partition local data</span>
+    partitions = [[] <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> range(size)]
+    <span class="hljs-keyword">for</span> elem <span class="hljs-keyword">in</span> local_data:
+        dest = find_partition(splitters, elem)
+        partitions[dest].append(elem)
+
+    <span class="hljs-comment"># Step 13: Exchange partitions</span>
+    received_data = MPI.Alltoall(partitions)
+
+    <span class="hljs-comment"># Step 14: Sort received data</span>
+    received_data.sort()
+
+    <span class="hljs-comment"># Step 15: Gather sorted data at root</span>
+    sorted_data = MPI.Gatherv(received_data)
+
+    <span class="hljs-comment"># Step 16: Print final sorted data (root)</span>
+    <span class="hljs-keyword">if</span> rank == <span class="hljs-number">0</span>:
+        print(sorted_data)
+
+    <span class="hljs-comment"># Step 17: Finalize MPI</span>
+    MPI.Finalize()
+
+</div></code></pre>
+<ul>
+<li>Merge Sort</li>
+</ul>
+<pre class="hljs"><code><div>    MergeSort():
+        <span class="hljs-keyword">if</span>((taskid == <span class="hljs-number">0</span> )):
+            //Master Process
+            //Split the array into halves proportionate to the number of processors
+            split=len(array)//num of processors  **round down to nearest whole number**
+
+            //MPI_SCATTER scatter halves to processors(<span class="hljs-keyword">in</span>)
+            master_to_worker=MPI_SCATTER()
+
+            //sort the local chunk <span class="hljs-keyword">in</span> the master
+            local_sort= splitter(local_array)
+
+            //MPI Gather call to bring the sorted arrays back into one array 
+            worker_to_master=MPI_GATHER()
+
+            //sort the final array <span class="hljs-keyword">from</span> the gather
+            final_array=MERGE_SORT(worker_to_master)
+            
+
+        <span class="hljs-keyword">if</span>(taskid &gt; <span class="hljs-number">0</span> ):
+            //Recieve the array <span class="hljs-keyword">from</span> the scatter call
+            MPI_SCATTER()
+            
+            //sort the array 
+            Splitter(recv array)
+            
+            // send result back to master
+            MPI_GATHER()
+            
+
+        Splitter(array):
+            If length == <span class="hljs-number">0</span> || length == <span class="hljs-number">1</span>:
+                <span class="hljs-keyword">return</span> array 
+            split=len(array)//<span class="hljs-number">2</span> **round down to nearest whole number**
+            lhs_array= array[:split]
+            rhs_array= array[split:]
+
+            
+            lhs_sort=Splitter(lhs_array)
+            rhs_sort=Splitter(rhs_array)
+            
+            <span class="hljs-keyword">return</span> MERGE_SORT(lhs,rhs)
+
+        MERGE_SORT(lhs,rhs):
+            sort vector=[]
+
+            <span class="hljs-keyword">while</span>(length of lhs <span class="hljs-keyword">and</span> rhs != <span class="hljs-number">0</span>):
+                <span class="hljs-keyword">if</span> lhs[<span class="hljs-number">0</span>] &lt; rhs[<span class="hljs-number">0</span>]:
+                    remove first element <span class="hljs-keyword">from</span> lhs <span class="hljs-keyword">and</span> append to sort
+                <span class="hljs-keyword">else</span>:
+                    remove first element <span class="hljs-keyword">from</span> rhs <span class="hljs-keyword">and</span> append to sort
+            
+            <span class="hljs-keyword">if</span>(len(lhs)!=<span class="hljs-number">0</span> <span class="hljs-keyword">and</span> len(rhs)==<span class="hljs-number">0</span>):
+                append lhs array to sort
+
+            <span class="hljs-keyword">if</span>(len(rhs)!=<span class="hljs-number">0</span> <span class="hljs-keyword">and</span> len(lhs)==<span class="hljs-number">0</span>):
+                append rhs array to sort
+            
+            <span class="hljs-keyword">return</span> sort
+</div></code></pre>
+<ul>
+<li>Radix Sort</li>
+</ul>
+<pre class="hljs"><code><div>    Function msd_radix_sort_mpi(data, digit_position, low, high, rank, size, comm):
+    If low &gt;= high OR digit_position &lt; <span class="hljs-number">0</span>:
+        Return  <span class="hljs-comment"># Base case: no more sorting needed</span>
+
+    <span class="hljs-comment"># Step 1: Local histogram creation</span>
+    Initialize local_histogram[<span class="hljs-number">10</span>] = {<span class="hljs-number">0</span>}
+    For i <span class="hljs-keyword">from</span> low to high:
+        local_histogram[get_digit(data[i], digit_position)] += <span class="hljs-number">1</span>
+
+    <span class="hljs-comment"># Step 2: Global histogram (MPI Reduce)</span>
+    Initialize global_histogram[<span class="hljs-number">10</span>] = {<span class="hljs-number">0</span>}
+    MPI_Reduce(local_histogram, global_histogram, SUM, root = <span class="hljs-number">0</span>)
+
+    <span class="hljs-comment"># Step 3: Compute bucket positions (root process) and broadcast</span>
+    If rank == <span class="hljs-number">0</span>:
+        cumulative_sum[<span class="hljs-number">0</span>] = <span class="hljs-number">0</span>
+        For i <span class="hljs-keyword">from</span> <span class="hljs-number">1</span> to <span class="hljs-number">9</span>:
+            cumulative_sum[i] = cumulative_sum[i<span class="hljs-number">-1</span>] + global_histogram[i<span class="hljs-number">-1</span>]
+    MPI_Bcast(cumulative_sum, root = <span class="hljs-number">0</span>)
+
+    <span class="hljs-comment"># Step 4: In-place bucket sorting</span>
+    i = low
+    While i &lt;= high:
+        digit = get_digit(data[i], digit_position)
+        correct_pos = cumulative_sum[digit]
+        If i &gt;= correct_pos AND i &lt; correct_pos + global_histogram[digit]:
+            i += <span class="hljs-number">1</span>
+        Else:
+            Swap data[i] <span class="hljs-keyword">with</span> data[correct_pos]
+            cumulative_sum[digit] += <span class="hljs-number">1</span>
+
+    <span class="hljs-comment"># Step 5: Recursively sort each bucket</span>
+    For digit <span class="hljs-keyword">from</span> <span class="hljs-number">0</span> to <span class="hljs-number">9</span>:
+        next_start = cumulative_sum[digit] - global_histogram[digit]
+        next_end = cumulative_sum[digit] - <span class="hljs-number">1</span>
+        If next_start &lt; next_end:
+            msd_radix_sort_mpi(data, digit_position - <span class="hljs-number">1</span>, next_start, next_end, rank, size, comm)
+
+
+<span class="hljs-comment"># Main function to initialize MPI and distribute the data</span>
+Function parallel_msd_radix_sort(data):
+    MPI_Init()
+    rank = MPI_Comm_rank(MPI_COMM_WORLD)
+    size = MPI_Comm_size(MPI_COMM_WORLD)
+
+    <span class="hljs-comment"># Step 1: Scatter data across processors</span>
+    local_data_size = len(data) // size
+    <span class="hljs-keyword">if</span> rank == <span class="hljs-number">0</span>:
+        local_data = np.array_split(data, size)
+    <span class="hljs-keyword">else</span>:
+        local_data = <span class="hljs-literal">None</span>
+    local_data = comm.scatter(local_data, root=<span class="hljs-number">0</span>)
+
+    <span class="hljs-comment"># Step 2: Apply the MSD Radix Sort on the local data</span>
+    max_digit_position = get_max_digit_position(data)  <span class="hljs-comment"># Find max digit length</span>
+    msd_radix_sort_mpi(local_data, max_digit_position, <span class="hljs-number">0</span>, len(local_data) - <span class="hljs-number">1</span>, rank, size, comm)
+
+    <span class="hljs-comment"># Step 3: Gather sorted subarrays back to root</span>
+    sorted_data = comm.gather(local_data, root=<span class="hljs-number">0</span>)
+
+    <span class="hljs-keyword">if</span> rank == <span class="hljs-number">0</span>:
+        <span class="hljs-comment"># Merge the results from all processors</span>
+        <span class="hljs-keyword">return</span> np.concatenate(sorted_data)
+    
+</div></code></pre>
+<h3 id="2c-evaluation-plan---what-and-how-will-you-measure-and-compare">2c. Evaluation plan - what and how will you measure and compare</h3>
+<ul>
+<li>
+<p>Input sizes, Input types:</p>
+<ul>
+<li>For our input sizes, we will start from a small n size for our array and then progressively make it larger.</li>
+<li>Input sizes: (2^{16}), (2^{18}), (2^{20}), (2^{22}), (2^{24}), (2^{26}), (2^{28})</li>
+<li>Input types:
+<ul>
+<li>Sorted arrays</li>
+<li>Reverse sorted arrays</li>
+<li>Random arrays</li>
+<li>1% perturbed</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Strong scaling (same problem size, increase number of processors/nodes):</p>
+<ul>
+<li>With this measurement, this could show diminishing returns as we try to find the optimized amount of processors for a given problem.</li>
+<li>Number of processors/nodes: 2, 4, 8, 32, 64, 128, 256, 512, 1024</li>
+</ul>
+</li>
+<li>
+<p>Weak scaling (increase problem size, increase number of processors):</p>
+<ul>
+<li>With this measurement, we could find the limit on each processor and how long it takes for something to compute among those algorithms.</li>
+<li>Number of processors/nodes: 2, 4, 8, 32, 64, 128, 256, 512, 1024</li>
+</ul>
+</li>
+<li>
+<p>Run time():</p>
+<ul>
+<li>With this measurement, we can compare the run times and although some algorithms inherently may be quicker than others, it's still good to compare to see how much extra time a certain algorithm could take to understand the costs associated with a given algorithm.</li>
+</ul>
+</li>
+</ul>
+<h3 id="3a-caliper-instrumentation">3a. Caliper instrumentation</h3>
+<p>Please use the caliper build <code>/scratch/group/csce435-f24/Caliper/caliper/share/cmake/caliper</code>
+(same as lab2 build.sh) to collect caliper files for each experiment you run.</p>
+<p>Your Caliper annotations should result in the following calltree
+(use <code>Thicket.tree()</code> to see the calltree):</p>
+<pre class="hljs"><code><div>main
+|_ data_init_X      # X = runtime OR io
+|_ comm
+|    |_ comm_small
+|    |_ comm_large
+|_ comp
+|    |_ comp_small
+|    |_ comp_large
+|_ correctness_check
+</div></code></pre>
+<p>Required region annotations:</p>
+<ul>
+<li><code>main</code> - top-level main function.
+<ul>
+<li><code>data_init_X</code> - the function where input data is generated or read in from file. Use <em>data_init_runtime</em> if you are generating the data during the program, and <em>data_init_io</em> if you are reading the data from a file.</li>
+<li><code>correctness_check</code> - function for checking the correctness of the algorithm output (e.g., checking if the resulting data is sorted).</li>
+<li><code>comm</code> - All communication-related functions in your algorithm should be nested under the <code>comm</code> region.
+<ul>
+<li>Inside the <code>comm</code> region, you should create regions to indicate how much data you are communicating (i.e., <code>comm_small</code> if you are sending or broadcasting a few values, <code>comm_large</code> if you are sending all of your local values).</li>
+<li>Notice that auxillary functions like MPI_init are not under here.</li>
+</ul>
+</li>
+<li><code>comp</code> - All computation functions within your algorithm should be nested under the <code>comp</code> region.
+<ul>
+<li>Inside the <code>comp</code> region, you should create regions to indicate how much data you are computing on (i.e., <code>comp_small</code> if you are sorting a few values like the splitters, <code>comp_large</code> if you are sorting values in the array).</li>
+<li>Notice that auxillary functions like data_init are not under here.</li>
+</ul>
+</li>
+<li><code>MPI_X</code> - You will also see MPI regions in the calltree if using the appropriate MPI profiling configuration (see <strong>Builds/</strong>). Examples shown below.</li>
+</ul>
+</li>
+</ul>
+<p>All functions will be called from <code>main</code> and most will be grouped under either <code>comm</code> or <code>comp</code> regions, representing communication and computation, respectively. You should be timing as many significant functions in your code as possible. <strong>Do not</strong> time print statements or other insignificant operations that may skew the performance measurements.</p>
+<h3 id="nesting-code-regions-example---all-computation-code-regions-should-be-nested-in-the-%22comp%22-parent-code-region-as-following"><strong>Nesting Code Regions Example</strong> - all computation code regions should be nested in the &quot;comp&quot; parent code region as following:</h3>
+<pre class="hljs"><code><div>CALI_MARK_BEGIN(&quot;comp&quot;);
+CALI_MARK_BEGIN(&quot;comp_small&quot;);
+sort_pivots(pivot_arr);
+CALI_MARK_END(&quot;comp_small&quot;);
+CALI_MARK_END(&quot;comp&quot;);
+
+# Other non-computation code
+...
+
+CALI_MARK_BEGIN(&quot;comp&quot;);
+CALI_MARK_BEGIN(&quot;comp_large&quot;);
+sort_values(arr);
+CALI_MARK_END(&quot;comp_large&quot;);
+CALI_MARK_END(&quot;comp&quot;);
+</div></code></pre>
+<h3 id="calltree-example"><strong>Calltree Example</strong>:</h3>
+<pre class="hljs"><code><div># MPI Mergesort
+4.695 main
+├─ 0.001 MPI_Comm_dup
+├─ 0.000 MPI_Finalize
+├─ 0.000 MPI_Finalized
+├─ 0.000 MPI_Init
+├─ 0.000 MPI_Initialized
+├─ 2.599 comm
+│  ├─ 2.572 MPI_Barrier
+│  └─ 0.027 comm_large
+│     ├─ 0.011 MPI_Gather
+│     └─ 0.016 MPI_Scatter
+├─ 0.910 comp
+│  └─ 0.909 comp_large
+├─ 0.201 data_init_runtime
+└─ 0.440 correctness_check
+</div></code></pre>
+<h3 id="calltrees"><strong>Calltrees</strong>:</h3>
+<h2 id="merge-sort"><strong>Merge Sort</strong>:</h2>
+<pre class="hljs"><code><div>203.481 main
+├─ 0.000 MPI_Init
+├─ 0.000 MPI_Comm_rank
+├─ 0.000 MPI_Comm_size
+├─ 7.895 data_init_runtime
+│  └─ 0.859 MPI_Gatherv
+├─ 1.012 comm
+│  ├─ 0.078 comm_small
+│  │  └─ 0.078 MPI_Bcast
+│  └─ 0.934 comm_large
+│     ├─ 0.134 MPI_Scatterv
+│     └─ 0.800 MPI_Gatherv
+├─ 99.080 comp
+│  └─ 99.080 comp_large
+├─ 94.625 correctness_check
+│  ├─ 93.918 MPI_Bcast
+│  ├─ 0.124 MPI_Scatterv
+│  ├─ 0.000 MPI_Send
+│  ├─ 0.046 MPI_Recv
+│  └─ 0.022 MPI_Allreduce
+├─ 0.000 MPI_Finalize
+├─ 0.000 MPI_Initialized
+├─ 0.000 MPI_Finalized
+└─ 0.001 MPI_Comm_dup
+
+
+</div></code></pre>
+<h2 id="sample-sort"><strong>Sample Sort</strong>:</h2>
+<pre class="hljs"><code><div>107.894 main
+├─ 0.000 MPI_Init
+├─ 0.000 MPI_Comm_rank
+├─ 0.000 MPI_Comm_size
+├─ 7.903 data_init_runtime
+│  └─ 0.875 MPI_Gatherv
+├─ 10.786 comm
+│  ├─ 0.171 comm_small
+│  │  ├─ 0.080 MPI_Bcast
+│  │  ├─ 0.007 MPI_Gather
+│  │  └─ 0.083 MPI_Gatherv
+│  └─ 10.615 comm_large
+│     ├─ 0.130 MPI_Scatterv
+│     ├─ 0.044 MPI_Alltoall
+│     ├─ 0.086 MPI_Alltoallv
+│     ├─ 2.965 MPI_Gather
+│     └─ 6.749 MPI_Gatherv
+├─ 87.876 comp
+│  ├─ 80.293 comp_large
+│  └─ 7.583 comp_small
+├─ 0.765 correctness_check
+│  ├─ 0.047 MPI_Bcast
+│  ├─ 0.127 MPI_Scatterv
+│  ├─ 0.000 MPI_Send
+│  ├─ 0.030 MPI_Recv
+│  └─ 0.028 MPI_Allreduce
+├─ 0.000 MPI_Finalize
+├─ 0.000 MPI_Initialized
+├─ 0.000 MPI_Finalized
+└─ 0.001 MPI_Comm_dup
+
+</div></code></pre>
+<h2 id="radix-sort"><strong>Radix Sort</strong>:</h2>
+<pre class="hljs"><code><div>306.792 main
+├─ 0.000 MPI_Init
+├─ 0.000 MPI_Comm_rank
+├─ 0.000 MPI_Comm_size
+├─ 7.997 data_init_runtime
+│  └─ 0.856 MPI_Gatherv
+├─ 0.242 comm
+│  ├─ 0.077 comm_small
+│  │  └─ 0.077 MPI_Bcast
+│  └─ 0.165 comm_large
+│     └─ 0.165 MPI_Scatter
+├─ 74.423 comp
+│  ├─ 35.560 comp_large
+│  └─ 38.863 comp_small
+│     └─ 0.180 MPI_Gather
+├─ 223.581 correctness_check
+│  ├─ 222.862 MPI_Bcast
+│  ├─ 0.128 MPI_Scatterv
+│  ├─ 0.000 MPI_Send
+│  ├─ 0.046 MPI_Recv
+│  └─ 0.027 MPI_Allreduce
+├─ 0.000 MPI_Finalize
+├─ 0.000 MPI_Initialized
+├─ 0.000 MPI_Finalized
+└─ 0.001 MPI_Comm_dup
+</div></code></pre>
+<h2 id="bitonic-sort"><strong>Bitonic Sort</strong>:</h2>
+<pre class="hljs"><code><div>
+</div></code></pre>
+<h3 id="3b-collect-metadata">3b. Collect Metadata</h3>
+<p>Have the following code in your programs to collect metadata:</p>
+<pre class="hljs"><code><div>adiak::init(NULL);
+adiak::launchdate();    // launch date of the job
+adiak::libraries();     // Libraries used
+adiak::cmdline();       // Command line used to launch the job
+adiak::clustername();   // Name of the cluster
+adiak::value(&quot;algorithm&quot;, algorithm); // The name of the algorithm you are using (e.g., &quot;merge&quot;, &quot;bitonic&quot;)
+adiak::value(&quot;programming_model&quot;, programming_model); // e.g. &quot;mpi&quot;
+adiak::value(&quot;data_type&quot;, data_type); // The datatype of input elements (e.g., double, int, float)
+adiak::value(&quot;size_of_data_type&quot;, size_of_data_type); // sizeof(datatype) of input elements in bytes (e.g., 1, 2, 4)
+adiak::value(&quot;input_size&quot;, input_size); // The number of elements in input dataset (1000)
+adiak::value(&quot;input_type&quot;, input_type); // For sorting, this would be choices: (&quot;Sorted&quot;, &quot;ReverseSorted&quot;, &quot;Random&quot;, &quot;1_perc_perturbed&quot;)
+adiak::value(&quot;num_procs&quot;, num_procs); // The number of processors (MPI ranks)
+adiak::value(&quot;scalability&quot;, scalability); // The scalability of your algorithm. choices: (&quot;strong&quot;, &quot;weak&quot;)
+adiak::value(&quot;group_num&quot;, group_number); // The number of your group (integer, e.g., 1, 10)
+adiak::value(&quot;implementation_source&quot;, implementation_source); // Where you got the source code of your algorithm. choices: (&quot;online&quot;, &quot;ai&quot;, &quot;handwritten&quot;).
+</div></code></pre>
+<p>They will show up in the <code>Thicket.metadata</code> if the caliper file is read into Thicket.</p>
+<p>For the metadata the launch dates will be varying for everyone on the team. The cluster is the grace cluster. the algorithm we are collecting data are merge , sample, bitonic and radix sort. The programming model is mpi. the input size we used for this submission is 2^28 and input type was random. The number of processors was 4. For scalibility we are testing strong and weak. We are group 2. For implementation_source it was a combination of handwritten, online, and ai.</p>
+<h3 id="see-the-builds-directory-to-find-the-correct-caliper-configurations-to-get-the-performance-metrics-they-will-show-up-in-the-thicketdataframe-when-the-caliper-file-is-read-into-thicket"><strong>See the <code>Builds/</code> directory to find the correct Caliper configurations to get the performance metrics.</strong> They will show up in the <code>Thicket.dataframe</code> when the Caliper file is read into Thicket.</h3>
+
+</body>
+</html>
