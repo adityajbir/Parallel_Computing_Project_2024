@@ -1,21 +1,20 @@
 #include "../common/common.h"
 
-// Merge function for merge sort
+// Merge function (basically a splitter)
 void merge(std::vector<int>& arr, int left, int mid, int right) {
     int n1 = mid - left + 1;
     int n2 = right - mid;
 
-    // Temp arrays
+    // Temp arrays needed for copying data over 
     std::vector<int> lhs(n1);
     std::vector<int> rhs(n2);
 
-    // Copy data to temp arrays
     std::copy(arr.begin() + left, arr.begin() + mid + 1, lhs.begin());
     std::copy(arr.begin() + mid + 1, arr.begin() + right + 1, rhs.begin());
 
-    // Merge temp arrays back into arr[left..right]
+    
     int i = 0, j = 0, k = left;
-
+    //merge temps into original
     while (i < n1 && j < n2) {
         if (lhs[i] <= rhs[j]) {
             arr[k++] = lhs[i++];
@@ -24,20 +23,18 @@ void merge(std::vector<int>& arr, int left, int mid, int right) {
         }
     }
 
-    // Copy remaining elements
+    // Copy remaining elements if left over 
+
     while (i < n1)
         arr[k++] = lhs[i++];
     while (j < n2)
         arr[k++] = rhs[j++];
 }
 
-// Merge sort function
+// Merge sort function(gatherer)
 void mergeSort(std::vector<int>& arr, int left, int right) {
     if (left < right) {
-        // Start computation small region
-        //CALI_MARK_BEGIN("COMP");
-        //CALI_MARK_BEGIN("COMP_SMALL");
-
+        
         int mid = left + (right - left) / 2;
         // Sort first and second halves
         mergeSort(arr, left, mid);
@@ -45,16 +42,15 @@ void mergeSort(std::vector<int>& arr, int left, int right) {
         // Merge the sorted halves
         merge(arr, left, mid, right);
 
-        // End computation small region
-        //CALI_MARK_END("COMP_SMALL");
-        //CALI_MARK_END("COMP");
-
+        
     }
 }
 
 std::vector<int> multiwayMerge(const std::vector<std::vector<int>>& sorted_subarrays) {
-    // Use a min-heap to perform multi-way merge
-    typedef std::pair<int, std::pair<int, int>> HeapNode; // (value, (array_index, element_index))
+    // Use a mininmum-heap to perform multi-way merge
+
+    //define heap 
+    typedef std::pair<int, std::pair<int, int>> HeapNode; 
     std::priority_queue<HeapNode, std::vector<HeapNode>, std::greater<HeapNode>> minHeap;
 
     // Initialize heap with the first element of each subarray
@@ -65,6 +61,8 @@ std::vector<int> multiwayMerge(const std::vector<std::vector<int>>& sorted_subar
     }
 
     std::vector<int> merged_array;
+
+    // add elements to final array as long as it is not emoty
     while (!minHeap.empty()) {
         HeapNode current = minHeap.top();
         minHeap.pop();
@@ -75,7 +73,7 @@ std::vector<int> multiwayMerge(const std::vector<std::vector<int>>& sorted_subar
 
         merged_array.push_back(value);
 
-        // If there are more elements in the same subarray, add the next element to the heap
+        // If there are more elements from same subarray, add the  element to heap
         if (element_index + 1 < sorted_subarrays[array_index].size()) {
             minHeap.push({sorted_subarrays[array_index][element_index + 1], {array_index, element_index + 1}});
         }
@@ -90,24 +88,29 @@ std::vector<int> mpiMergeSort(std::vector<int>& inputArray) {
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-    int n; // Total number of elements
 
+    // Total elements
+    int n; 
+
+    //fetches size of the input array we need from argument
     if (rank == 0) {
         n = inputArray.size();
     }
 
-    // Broadcast the total number of elements
+    //comm call    
     CALI_MARK_BEGIN(CALI_COMM);
     CALI_MARK_BEGIN(CALI_COMM_SMALL);
     MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
     CALI_MARK_END(CALI_COMM_SMALL);
     CALI_MARK_END(CALI_COMM);
 
-    // Determine the size of data each process will handle
+    // Determine the size of data each process will handle(should be close to equal for each)
     int local_n = n / size;
     int remainder = n % size;
 
+    //count and displacement vecs for distrubition
     std::vector<int> counts(size);
+
     std::vector<int> displs(size);
 
     for (int i = 0; i < size; ++i) {
@@ -126,19 +129,20 @@ std::vector<int> mpiMergeSort(std::vector<int>& inputArray) {
     CALI_MARK_END(CALI_COMM_LARGE);
     CALI_MARK_END(CALI_COMM);
 
-    // Local merge sort
-    //CALI_MARK_BEGIN(CALI_COMP);
-    //CALI_MARK_BEGIN(CALI_COMM_LARGE);
+    // Local merge sort call
+    CALI_MARK_BEGIN(CALI_COMP);
+    CALI_MARK_BEGIN(CALI_COMP_LARGE);
     mergeSort(local_data, 0, counts[rank] - 1);
-    //CALI_MARK_END(CALI_COMM_LARGE);
-    //CALI_MARK_END(CALI_COMP);
+    CALI_MARK_END(CALI_COMP_LARGE);
+    CALI_MARK_END(CALI_COMP);
 
-    // Gather the sorted subarrays at the root process
+    // Gather the sorted subarrays from workers at the root process
     std::vector<int> gathered_data;
     if (rank == 0) {
         gathered_data.resize(n);
     }
 
+    //comm call
     CALI_MARK_BEGIN(CALI_COMM);
     CALI_MARK_BEGIN(CALI_COMM_LARGE);
     MPI_Gatherv(local_data.data(), 
@@ -163,15 +167,18 @@ std::vector<int> mpiMergeSort(std::vector<int>& inputArray) {
         }
 
         // Merge all sorted subarrays
-        //CALI_MARK_BEGIN(CALI_COMP);
-        //CALI_MARK_BEGIN(CALI_COMP_LARGE);
+        CALI_MARK_BEGIN(CALI_COMP);
+        CALI_MARK_BEGIN(CALI_COMP_LARGE);
+        
         std::vector<int> sortedArray = multiwayMerge(sorted_subarrays);
-        //CALI_MARK_END(CALI_COMM_LARGE);
-        //CALI_MARK_END(CALI_COMP);
+        
+        CALI_MARK_END(CALI_COMP_LARGE);
+        CALI_MARK_END(CALI_COMP);
 
         return sortedArray;
     } else {
-        // Other processes return an empty vector
+
+        // default return call 
         return std::vector<int>();
     }
 }
