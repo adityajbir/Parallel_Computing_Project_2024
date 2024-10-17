@@ -5,9 +5,7 @@ int main(int argc, char** argv) {
     CALI_CXX_MARK_FUNCTION
 
     // Initialize MPI
-    CALI_MARK_BEGIN("MPI_Init");
     MPI_Init(&argc, &argv);
-    CALI_MARK_END("MPI_Init");
 
     int rank;
     int size;
@@ -133,11 +131,8 @@ int main(int argc, char** argv) {
         }
     }
 
-
     // Finalize MPI
-    CALI_MARK_BEGIN("MPI_Finalize");
     MPI_Finalize();
-    CALI_MARK_END("MPI_Finalize");
 
     return 0;
 }

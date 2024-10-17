@@ -18,9 +18,7 @@ std::vector<int> sampleSort(std::vector<int>& inputArray) {
     CALI_MARK_BEGIN(CALI_COMM);
     CALI_MARK_BEGIN(CALI_COMM_SMALL);
 
-    CALI_MARK_BEGIN("MPI_Bcast");
     MPI_Bcast(&N, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    CALI_MARK_END("MPI_Bcast");
 
     CALI_MARK_END(CALI_COMM_SMALL);
     CALI_MARK_END(CALI_COMM);
@@ -45,7 +43,6 @@ std::vector<int> sampleSort(std::vector<int>& inputArray) {
     CALI_MARK_BEGIN(CALI_COMM);
     CALI_MARK_BEGIN(CALI_COMM_LARGE);
 
-    CALI_MARK_BEGIN("MPI_Scatterv");
     MPI_Scatterv(
         rank == 0 ? inputArray.data() : nullptr, // Send buffer
         scatterSendCounts.data(),                // Send counts
@@ -57,7 +54,6 @@ std::vector<int> sampleSort(std::vector<int>& inputArray) {
         0,                                       // Root process
         MPI_COMM_WORLD                           // Communicator
     );
-    CALI_MARK_END("MPI_Scatterv");
 
     CALI_MARK_END(CALI_COMM_LARGE);
     CALI_MARK_END(CALI_COMM);
@@ -92,7 +88,6 @@ std::vector<int> sampleSort(std::vector<int>& inputArray) {
     CALI_MARK_BEGIN(CALI_COMM);
     CALI_MARK_BEGIN(CALI_COMM_SMALL);
 
-    CALI_MARK_BEGIN("MPI_Gather");
     std::vector<int> recvSampleSizes(size);
     MPI_Gather(
         &localSampleSize,       // Send buffer
@@ -104,7 +99,6 @@ std::vector<int> sampleSort(std::vector<int>& inputArray) {
         0,                      // Root process
         MPI_COMM_WORLD          // Communicator
     );
-    CALI_MARK_END("MPI_Gather");
 
     CALI_MARK_END(CALI_COMM_SMALL);
     CALI_MARK_END(CALI_COMM);
@@ -123,7 +117,6 @@ std::vector<int> sampleSort(std::vector<int>& inputArray) {
     CALI_MARK_BEGIN(CALI_COMM);
     CALI_MARK_BEGIN(CALI_COMM_SMALL);
 
-    CALI_MARK_BEGIN("MPI_Gatherv");
     std::vector<int> gatheredSamples;
     if (rank == 0) {
         gatheredSamples.resize(totalSamples);
@@ -139,7 +132,6 @@ std::vector<int> sampleSort(std::vector<int>& inputArray) {
         0,                       // Root process
         MPI_COMM_WORLD           // Communicator
     );
-    CALI_MARK_END("MPI_Gatherv");
 
     CALI_MARK_END(CALI_COMM_SMALL);
     CALI_MARK_END(CALI_COMM);
@@ -166,7 +158,6 @@ std::vector<int> sampleSort(std::vector<int>& inputArray) {
     CALI_MARK_BEGIN(CALI_COMM);
     CALI_MARK_BEGIN(CALI_COMM_SMALL);
 
-    CALI_MARK_BEGIN("MPI_Bcast");
     MPI_Bcast(
         splitters.data(), // Data buffer
         size - 1,         // Number of elements
@@ -174,7 +165,6 @@ std::vector<int> sampleSort(std::vector<int>& inputArray) {
         0,                // Root process
         MPI_COMM_WORLD    // Communicator
     );
-    CALI_MARK_END("MPI_Bcast");
 
     CALI_MARK_END(CALI_COMM_SMALL);
     CALI_MARK_END(CALI_COMM);
@@ -215,7 +205,6 @@ std::vector<int> sampleSort(std::vector<int>& inputArray) {
     }
 
     // Exchange bucket sizes using MPI_Alltoall
-    CALI_MARK_BEGIN("MPI_Alltoall");
     std::vector<int> recvCountsAlltoall(size);
     MPI_Alltoall(
         sendCountsAlltoall.data(), // Send buffer
@@ -226,7 +215,6 @@ std::vector<int> sampleSort(std::vector<int>& inputArray) {
         MPI_INT,                   // Data type
         MPI_COMM_WORLD             // Communicator
     );
-    CALI_MARK_END("MPI_Alltoall");
 
     // Prepare recv displacements for MPI_Alltoallv
     std::vector<int> rdisplsAlltoall(size);
@@ -243,7 +231,6 @@ std::vector<int> sampleSort(std::vector<int>& inputArray) {
     std::vector<int> recvBuf(recvTotal);
 
     // Exchange data using MPI_Alltoallv
-    CALI_MARK_BEGIN("MPI_Alltoallv");
     MPI_Alltoallv(
         sendBuf.data(),               // Send buffer
         sendCountsAlltoall.data(),    // Send counts
@@ -255,7 +242,6 @@ std::vector<int> sampleSort(std::vector<int>& inputArray) {
         MPI_INT,                      // Data type
         MPI_COMM_WORLD                // Communicator
     );
-    CALI_MARK_END("MPI_Alltoallv");
 
     CALI_MARK_END(CALI_COMM_LARGE);
     CALI_MARK_END(CALI_COMM);
@@ -271,7 +257,6 @@ std::vector<int> sampleSort(std::vector<int>& inputArray) {
     CALI_MARK_BEGIN(CALI_COMM);
     CALI_MARK_BEGIN(CALI_COMM_LARGE);
 
-    CALI_MARK_BEGIN("MPI_Gather");
     int localSortedSize = recvBuf.size();
     std::vector<int> sortedRecvSizes(size);
     MPI_Gather(
@@ -284,7 +269,6 @@ std::vector<int> sampleSort(std::vector<int>& inputArray) {
         0,                  // Root process
         MPI_COMM_WORLD      // Communicator
     );
-    CALI_MARK_END("MPI_Gather");
 
     std::vector<int> sortedRecvDispls(size);
     if (rank == 0) {
@@ -294,7 +278,6 @@ std::vector<int> sampleSort(std::vector<int>& inputArray) {
         }
     }
 
-    CALI_MARK_BEGIN("MPI_Gatherv");
     std::vector<int> sortedData;
     if (rank == 0) {
         sortedData.resize(N);
@@ -310,7 +293,6 @@ std::vector<int> sampleSort(std::vector<int>& inputArray) {
         0,                     // Root process
         MPI_COMM_WORLD         // Communicator
     );
-    CALI_MARK_END("MPI_Gatherv");
 
     CALI_MARK_END(CALI_COMM_LARGE);
     CALI_MARK_END(CALI_COMM);
