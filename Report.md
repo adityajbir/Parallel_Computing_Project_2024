@@ -397,6 +397,57 @@ CALI_MARK_END("comp");
 └─ 0.440 correctness_check
 ```
 
+### **Calltrees**:
+
+
+## **Merge Sort**:
+```
+203.481 main
+├─ 0.000 MPI_Init
+├─ 0.000 MPI_Comm_rank
+├─ 0.000 MPI_Comm_size
+├─ 7.895 data_init_runtime
+│  └─ 0.859 MPI_Gatherv
+├─ 1.012 comm
+│  ├─ 0.078 comm_small
+│  │  └─ 0.078 MPI_Bcast
+│  └─ 0.934 comm_large
+│     ├─ 0.134 MPI_Scatterv
+│     └─ 0.800 MPI_Gatherv
+├─ 99.080 comp
+│  └─ 99.080 comp_large
+├─ 94.625 correctness_check
+│  ├─ 93.918 MPI_Bcast
+│  ├─ 0.124 MPI_Scatterv
+│  ├─ 0.000 MPI_Send
+│  ├─ 0.046 MPI_Recv
+│  └─ 0.022 MPI_Allreduce
+├─ 0.000 MPI_Finalize
+├─ 0.000 MPI_Initialized
+├─ 0.000 MPI_Finalized
+└─ 0.001 MPI_Comm_dup
+
+
+```
+
+## **Sample Sort**:
+```
+
+```
+
+## **Radix Sort**:
+```
+
+```
+
+## **Bitonic Sort**:
+```
+
+```
+
+
+
+
 ### 3b. Collect Metadata
 
 Have the following code in your programs to collect metadata:
