@@ -35,8 +35,8 @@ void merge(std::vector<int>& arr, int left, int mid, int right) {
 void mergeSort(std::vector<int>& arr, int left, int right) {
     if (left < right) {
         // Start computation small region
-        CALI_MARK_BEGIN("COMP");
-        CALI_MARK_BEGIN("COMP_SMALL");
+        //CALI_MARK_BEGIN("COMP");
+        //CALI_MARK_BEGIN("COMP_SMALL");
 
         int mid = left + (right - left) / 2;
         // Sort first and second halves
@@ -46,8 +46,8 @@ void mergeSort(std::vector<int>& arr, int left, int right) {
         merge(arr, left, mid, right);
 
         // End computation small region
-        CALI_MARK_END("COMP_SMALL");
-        CALI_MARK_END("COMP");
+        //CALI_MARK_END("COMP_SMALL");
+        //CALI_MARK_END("COMP");
 
     }
 }
@@ -97,11 +97,11 @@ std::vector<int> mpiMergeSort(std::vector<int>& inputArray) {
     }
 
     // Broadcast the total number of elements
-    CALI_MARK_BEGIN("COMM");
-    CALI_MARK_BEGIN("COMM_SMALL");
+    CALI_MARK_BEGIN(CALI_COMM);
+    CALI_MARK_BEGIN(CALI_COMM_SMALL);
     MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    CALI_MARK_END("COMM_SMALL");
-    CALI_MARK_END("COMM");
+    CALI_MARK_END(CALI_COMM_SMALL);
+    CALI_MARK_END(CALI_COMM);
 
     // Determine the size of data each process will handle
     int local_n = n / size;
@@ -119,19 +119,19 @@ std::vector<int> mpiMergeSort(std::vector<int>& inputArray) {
     std::vector<int> local_data(counts[rank]);
 
     // Scatter the data using MPI_Scatterv
-    CALI_MARK_BEGIN("COMM");
-    CALI_MARK_BEGIN("COMM_LARGE");
+    CALI_MARK_BEGIN(CALI_COMM);
+    CALI_MARK_BEGIN(CALI_COMM_LARGE);
     MPI_Scatterv(rank == 0 ? inputArray.data() : nullptr, counts.data(), displs.data(), MPI_INT,
                  local_data.data(), counts[rank], MPI_INT, 0, MPI_COMM_WORLD);
-    CALI_MARK_END("COMM_LARGE");
-    CALI_MARK_END("COMM");
+    CALI_MARK_END(CALI_COMM_LARGE);
+    CALI_MARK_END(CALI_COMM);
 
     // Local merge sort
-    CALI_MARK_BEGIN("COMP");
-    CALI_MARK_BEGIN("COMP_LARGE");
+    //CALI_MARK_BEGIN(CALI_COMP);
+    //CALI_MARK_BEGIN(CALI_COMM_LARGE);
     mergeSort(local_data, 0, counts[rank] - 1);
-    CALI_MARK_END("COMP_LARGE");
-    CALI_MARK_END("COMP");
+    //CALI_MARK_END(CALI_COMM_LARGE);
+    //CALI_MARK_END(CALI_COMP);
 
     // Gather the sorted subarrays at the root process
     std::vector<int> gathered_data;
@@ -139,8 +139,8 @@ std::vector<int> mpiMergeSort(std::vector<int>& inputArray) {
         gathered_data.resize(n);
     }
 
-    CALI_MARK_BEGIN("COMM");
-    CALI_MARK_BEGIN("COMM_LARGE");
+    CALI_MARK_BEGIN(CALI_COMM);
+    CALI_MARK_BEGIN(CALI_COMM_LARGE);
     MPI_Gatherv(local_data.data(), 
                 counts[rank], 
                 MPI_INT,
@@ -150,8 +150,8 @@ std::vector<int> mpiMergeSort(std::vector<int>& inputArray) {
                 MPI_INT, 0, 
                 MPI_COMM_WORLD
                 );
-    CALI_MARK_END("COMM_LARGE");
-    CALI_MARK_END("COMM");
+    CALI_MARK_END(CALI_COMM_LARGE);
+    CALI_MARK_END(CALI_COMM);
 
     // Root process performs final merge
     if (rank == 0) {
@@ -163,11 +163,11 @@ std::vector<int> mpiMergeSort(std::vector<int>& inputArray) {
         }
 
         // Merge all sorted subarrays
-        CALI_MARK_BEGIN("COMP");
-        CALI_MARK_BEGIN("COMP_LARGE");
+        //CALI_MARK_BEGIN(CALI_COMP);
+        //CALI_MARK_BEGIN(CALI_COMP_LARGE);
         std::vector<int> sortedArray = multiwayMerge(sorted_subarrays);
-        CALI_MARK_END("COMP_LARGE");
-        CALI_MARK_END("COMP");
+        //CALI_MARK_END(CALI_COMM_LARGE);
+        //CALI_MARK_END(CALI_COMP);
 
         return sortedArray;
     } else {
