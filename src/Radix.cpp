@@ -74,9 +74,7 @@ std::vector<int> radixSort(std::vector<int> &arr) {
     CALI_MARK_BEGIN(CALI_COMM);
     CALI_MARK_BEGIN(CALI_COMM_SMALL);
 
-    CALI_MARK_BEGIN("MPI_Bcast");
     MPI_Bcast(&array_size, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    CALI_MARK_END("MPI_Bcast");
 
     CALI_MARK_END(CALI_COMM_SMALL);
     CALI_MARK_END(CALI_COMM);
@@ -88,9 +86,7 @@ std::vector<int> radixSort(std::vector<int> &arr) {
     CALI_MARK_BEGIN(CALI_COMM);
     CALI_MARK_BEGIN(CALI_COMM_LARGE);
 
-    CALI_MARK_BEGIN("MPI_Scatterv");
     MPI_Scatter(arr.data(), local_n, MPI_INT, local_data.data(), local_n, MPI_INT, 0, MPI_COMM_WORLD);
-    CALI_MARK_END("MPI_Scatterv");
 
     CALI_MARK_END(CALI_COMM_LARGE);
     CALI_MARK_END(CALI_COMM);
@@ -112,7 +108,6 @@ std::vector<int> radixSort(std::vector<int> &arr) {
     CALI_MARK_BEGIN(CALI_COMP);
     CALI_MARK_BEGIN(CALI_COMP_SMALL);
 
-    CALI_MARK_BEGIN("MPI_Gather");
     std::vector<int> sortedData;
     if(rank == 0) {
         sortedData.resize(array_size);
@@ -120,7 +115,6 @@ std::vector<int> radixSort(std::vector<int> &arr) {
 
     // Gather sorted segments back to the root process
     MPI_Gather(local_data.data(), local_n, MPI_INT, sortedData.data(), local_n, MPI_INT, 0, MPI_COMM_WORLD);
-    CALI_MARK_END("MPI_Gather");
 
     CALI_MARK_END(CALI_COMP_SMALL);
     CALI_MARK_END(CALI_COMP);
