@@ -471,7 +471,31 @@ CALI_MARK_END("comp");
 
 ## **Radix Sort**:
 ```
-
+306.792 main
+├─ 0.000 MPI_Init
+├─ 0.000 MPI_Comm_rank
+├─ 0.000 MPI_Comm_size
+├─ 7.997 data_init_runtime
+│  └─ 0.856 MPI_Gatherv
+├─ 0.242 comm
+│  ├─ 0.077 comm_small
+│  │  └─ 0.077 MPI_Bcast
+│  └─ 0.165 comm_large
+│     └─ 0.165 MPI_Scatter
+├─ 74.423 comp
+│  ├─ 35.560 comp_large
+│  └─ 38.863 comp_small
+│     └─ 0.180 MPI_Gather
+├─ 223.581 correctness_check
+│  ├─ 222.862 MPI_Bcast
+│  ├─ 0.128 MPI_Scatterv
+│  ├─ 0.000 MPI_Send
+│  ├─ 0.046 MPI_Recv
+│  └─ 0.027 MPI_Allreduce
+├─ 0.000 MPI_Finalize
+├─ 0.000 MPI_Initialized
+├─ 0.000 MPI_Finalized
+└─ 0.001 MPI_Comm_dup
 ```
 
 ## **Bitonic Sort**:
