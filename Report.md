@@ -20,7 +20,11 @@
 - Architecture: For all the algorithms below we will be implementing them with an MPI architecture
 - Bitonic Sort: This algorithm requires the size of the input to be a power of 2, it creates a bitonic sequence from the array before making comparisons and returning a sorted array. The runtime of this algorithm is N/P log^2(N/P), where P is the number of processors. This algorithm will be implemented by Juan Carrasco 
 
-- Sample Sort (Eyad Nazir): A parallel sorting algorithm that divides the input array into smaller subarrays, sorts them independently, and merges them back together.
+- Sample Sort (Eyad Nazir): Sample sort is a parallel sorting algorithm that divides the input array into smaller subarrays, sorts them independently, and merges them back together. The algorithm begins with the root process determining the total number of elements in the input array and broadcasting this information to all processes using `MPI_Bcast`. The input array is then divided into smaller subarrays, which are distributed to different processes using `MPI_Scatterv`. Each process independently sorts its local subarray. 
+
+Next, each process selects a set of local samples from its sorted subarray, with the number of samples equal to the number of processes minus one. The sizes of these local samples are gathered at the root process using `MPI_Gather`, and the root process then gathers all the local samples from each process using `MPI_Gatherv`. The root process sorts the gathered samples and selects splitters to partition the data, which are then broadcasted to all processes using `MPI_Bcast`.
+
+Each process partitions its local subarray based on the splitters, creating buckets of data to be sent to the corresponding processes. The sizes of these buckets are exchanged among all processes using `MPI_Alltoall`, and the data in the buckets is exchanged using `MPI_Alltoallv`. Each process then sorts the data it received from other processes. Finally, the sizes of the sorted subarrays are gathered at the root process using `MPI_Gather`, and the root process gathers all the sorted subarrays from each process using `MPI_Gatherv`. The root process returns the fully sorted array, while other processes return an empty array. This approach leverages the computational power of multiple processes to efficiently sort large datasets in parallel.
 
 - Merge Sort (Aditya Biradar): At its base the merge sort is considered a recursive algorithm, and usually has a runtime of n log(n). In this assignment we will be paralleizing this algorithm.
 
@@ -432,6 +436,36 @@ CALI_MARK_END("comp");
 
 ## **Sample Sort**:
 ```
+107.894 main
+├─ 0.000 MPI_Init
+├─ 0.000 MPI_Comm_rank
+├─ 0.000 MPI_Comm_size
+├─ 7.903 data_init_runtime
+│  └─ 0.875 MPI_Gatherv
+├─ 10.786 comm
+│  ├─ 0.171 comm_small
+│  │  ├─ 0.080 MPI_Bcast
+│  │  ├─ 0.007 MPI_Gather
+│  │  └─ 0.083 MPI_Gatherv
+│  └─ 10.615 comm_large
+│     ├─ 0.130 MPI_Scatterv
+│     ├─ 0.044 MPI_Alltoall
+│     ├─ 0.086 MPI_Alltoallv
+│     ├─ 2.965 MPI_Gather
+│     └─ 6.749 MPI_Gatherv
+├─ 87.876 comp
+│  ├─ 80.293 comp_large
+│  └─ 7.583 comp_small
+├─ 0.765 correctness_check
+│  ├─ 0.047 MPI_Bcast
+│  ├─ 0.127 MPI_Scatterv
+│  ├─ 0.000 MPI_Send
+│  ├─ 0.030 MPI_Recv
+│  └─ 0.028 MPI_Allreduce
+├─ 0.000 MPI_Finalize
+├─ 0.000 MPI_Initialized
+├─ 0.000 MPI_Finalized
+└─ 0.001 MPI_Comm_dup
 
 ```
 
