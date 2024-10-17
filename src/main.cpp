@@ -2,7 +2,7 @@
 
 int main(int argc, char** argv) {
     // Start Caliper main region
-    CALI_CXX_MARK_FUNCTION
+    CALI_CXX_MARK_FUNCTION;
 
     // Initialize MPI
     MPI_Init(&argc, &argv);
