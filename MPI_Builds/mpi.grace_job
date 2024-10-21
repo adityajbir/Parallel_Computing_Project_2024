@@ -19,20 +19,29 @@
 #
 power_of_2=$1
 processes=$SLURM_NTASKS
-input_type=${2:-random}  # Default to "random" if not provided
-alg_type=${3:-sampleSort}  # Default to "sampleSort" if not provided
+input_type=${2:-random}     # Default to "random" if not provided
+alg_type=${3:-sampleSort}   # Default to "sampleSort" if not provided
 
-module load intel/2020b > /dev/null 2>&1       # load Intel software stack
+# Load required modules
+module load intel/2020b > /dev/null 2>&1       # Load Intel software stack
 module load CMake/3.12.1 > /dev/null 2>&1
 module load GCCcore/8.3.0 > /dev/null 2>&1
 
+# Create directories if they don't exist
+mkdir -p cali_files
+mkdir -p output_files
+
 # Construct the output filename
-output_file="p${processes}-a_2^${power_of_2}-${input_type}-${alg_type}.txt"
+output_file="output_files/p${processes}-a_2^${power_of_2}-${input_type}-${alg_type}.txt"
 
 # Redirect stdout and stderr to the output file
 exec > "$output_file" 2>&1
 
-export CALI_CONFIG="spot(output=p${processes}-a_2^${power_of_2}-${input_type}-${alg_type}.cali, time.variance,profile.mpi)"
+# Set the Caliper configuration to save in cali_files directory
+export CALI_CONFIG="spot(output=cali_files/p${processes}-a_2^${power_of_2}-${input_type}-${alg_type}.cali, time.variance,profile.mpi)"
+
+# Run the MPI program
 mpirun -np $processes ./main_executable $power_of_2 $input_type $alg_type
 
+# Display job information
 squeue -j $SLURM_JOBID
