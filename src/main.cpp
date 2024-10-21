@@ -92,7 +92,7 @@ int main(int argc, char** argv) {
     std::string scalability = "strong"; // or "weak" depending on your experiment
     adiak::value("scalability", scalability);
     adiak::value("group_num", 2);
-    adiak::value("implementation_source", "handwritten","online","ai");
+    adiak::value("implementation_source", "handwritten");
 
     // Data initialization
     CALI_MARK_BEGIN(CALI_DATA_INIT_RUNTIME);
