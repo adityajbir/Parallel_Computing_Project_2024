@@ -18,8 +18,10 @@ for input_size in input_sizes:
                     nodes = num_procs // max_tasks_per_node
                     ntasks_per_node = max_tasks_per_node
 
+                job_name = f"{alg_type}_{input_type}_{input_size}_{num_procs}"
                 command = [
                     "sbatch",
+                    f"--job-name={job_name}",
                     f"--nodes={nodes}",
                     f"--ntasks-per-node={ntasks_per_node}",
                     "mpi.grace_job",
