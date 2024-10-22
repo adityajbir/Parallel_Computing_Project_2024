@@ -688,7 +688,15 @@ perform runs that invoke algorithm2 for Sorted, ReverseSorted, and Random data).
     - Total time
     - Variance time/rank
 
+#######################################Performance Evaluation ##########################################
+## **Merge Sort**:
 
+## **Bitonic Sort**:
+
+## **Sample Sort**:
+
+## **Radix Sort**:
+##########################################################################################################
 
 
 ## 5. Presentation
