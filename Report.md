@@ -704,6 +704,25 @@ perform runs that invoke algorithm2 for Sorted, ReverseSorted, and Random data).
 ## **Sample Sort**:
 
 ## **Radix Sort**:
+<p float="left">
+  <img src="graphs/radixSort/comp_large_total_time_input_perturbed.jpeg" alt="Radix Sort - Comp Large Total Time Input Perturbed" width="49%" />
+  <img src="graphs/radixSort/comp_large_total_time_input_random.jpeg" alt="Radix Sort - Comp Large Total Time Input Random" width="49%" />
+</p>
+<p float="left">
+  <img src="graphs/radixSort/comp_large_total_time_input_sorted.jpeg" alt="Radix Sort - Comp Large Total Time Input Sorted" width="49%" />
+  <img src="graphs/radixSort/comp_large_total_time_input_reverseSorted.jpeg" alt="Radix Sort - Comp Large Total Time Input ReverseSorted" width="49%" />
+</p>
+<p float="left">
+  <img src="graphs/radixSort/comm_large_total_time_input_reverseSorted.jpeg" alt="Radix Sort - Comm Large Total Time Input ReverseSorted" width="49%" />
+</p>
+<p float="left">
+  <img src="graphs/radixSort/comm_large_times_matrix_2^16_input_reverseSorted.jpeg" alt="Radix Sort - Comm Large Times Matrix 2^16 Input ReverseSorted" width="49%" />
+  <img src="graphs/radixSort/comm_large_times_matrix_2^20_input_perturbed.jpeg" alt="Radix Sort - Comm Large Times Matrix 2^20 Input Perturbed" width="49%" />
+</p>
+<p float="left">
+  <img src="graphs/radixSort/comm_large_times_matrix_2^24_input_sorted.jpeg" alt="Radix Sort - Comm Large Times Matrix 2^24 Input Sorted" width="49%" />
+  <img src="graphs/radixSort/comm_large_times_matrix_2^28_input_perturbed.jpeg" alt="Radix Sort - Comm Large Times Matrix 2^28 Input Perturbed" width="49%" />
+</p>
 ##########################################################################################################
 
 
