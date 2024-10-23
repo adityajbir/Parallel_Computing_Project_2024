@@ -692,6 +692,7 @@ perform runs that invoke algorithm2 for Sorted, ReverseSorted, and Random data).
 ## **Merge Sort**:
 
 ## **Bitonic Sort**:
+### Computation Large (Total Time)
 <p float="left">
   <img src="graphs/bitonicSort/comp_large_total_time_input_perturbed.jpeg" alt="Bitonic Sort - Comp Large Total Time Input Perturbed" width="49%" />
   <img src="graphs/bitonicSort/comp_large_total_time_input_random.jpeg" alt="Bitonic Sort - Comp Large Total Time Input Random" width="49%" />
@@ -699,6 +700,37 @@ perform runs that invoke algorithm2 for Sorted, ReverseSorted, and Random data).
 <p float="left">
   <img src="graphs/bitonicSort/comp_large_total_time_input_sorted.jpeg" alt="Bitonic Sort - Comp Large Total Time Input Sorted" width="49%" />
   <img src="graphs/bitonicSort/comp_large_total_time_input_reverseSorted.jpeg" alt="Bitonic Sort - Comp Large Total Time Input ReverseSorted" width="49%" />
+</p>
+
+### Communication Large (Total Time)
+<p float="left">
+  <img src="graphs/bitonicSort/comm_large_total_time_input_perturbed.jpeg" alt="Bitonic Sort - Comm Large Total Time Input Perturbed" width="49%" />
+  <img src="graphs/bitonicSort/comm_large_total_time_input_random.jpeg" alt="Bitonic Sort - Comm Large Total Time Input Random" width="49%" />
+</p>
+<p float="left">
+  <img src="graphs/bitonicSort/comm_large_total_time_input_sorted.jpeg" alt="Bitonic Sort - Comm Large Total Time Input Sorted" width="49%" />
+  <img src="graphs/bitonicSort/comm_large_total_time_input_reverseSorted.jpeg" alt="Bitonic Sort - Comm Large Total Time Input ReverseSorted" width="49%" />
+</p>
+
+### Computation Large (Min, Max, Avg., Variance)
+<p float="left">
+  <img src="graphs/bitonicSort/comp_large_times_matrix_2^16_input_random.jpeg" alt="Bitonic Sort - Comp Large Min,Max,Avg, Variance Time Input Random" width="49%" />
+  <img src="graphs/bitonicSort/comp_large_times_matrix_2^20_input_random.jpeg" alt="Bitonic Sort - Comp Large Min,Max,Avg, Variance Time Input Random" width="49%" />
+</p>
+<p float="left">
+  <img src="graphs/bitonicSort/comp_large_times_matrix_2^24_input_random.jpeg" alt="Bitonic Sort - Comp Large Min,Max,Avg, Variance Time Input Random" width="49%" />
+  <img src="graphs/bitonicSort/comp_large_times_matrix_2^28_input_random.jpeg" alt="Bitonic Sort - Comp Large Min,Max,Avg, Variance Time Input Random" width="49%" />
+</p>
+
+
+### Data generation and Correctness check (Min, Max, Avg., Variance)
+<p float="left">
+  <img src="graphs/bitonicSort/data_init_runtime_times_matrix_2^18_input_reverseSorted.jpeg" alt="Bitonic Sort - Data Generation Input Reverse Sorted 2^18" width="49%" />
+  <img src="graphs/bitonicSort/data_init_runtime_times_matrix_2^28_input_reverseSorted.jpeg" alt="Bitonic Sort - Data Generation Input Reverse Sorted 2^28" width="49%" />
+</p>
+<p float="left">
+  <img src="graphs/bitonicSort/correctness_check_times_matrix_2^18_input_reverseSorted.jpeg" alt="Bitonic Sort - Correctness Check Input Reverse Sorted 2^18" width="49%" />
+  <img src="graphs/bitonicSort/correctness_check_times_matrix_2^28_input_reverseSorted.jpeg" alt="Bitonic Sort - Comm Large Total Time Input ReverseSorted" width="49%" />
 </p>
 
 ## **Sample Sort**:
@@ -750,12 +782,12 @@ However, 2<sup>20</sup> shows irregular results, with communication times fluctu
 
 ### Data generation and Correctness check (Min, Max, Avg., Variance)
 <p float="left">
-  <img src="graphs/sampleSort/data_init_runtime_times_matrix_2^28_input_reverseSorted.jpeg" alt="Sample Sort - Data Init Runtime Times Matrix 2^28 Input ReverseSorted" width="49%" />
-  <img src="graphs/sampleSort/data_init_runtime_times_matrix_2^18_input_reverseSorted.jpeg" alt="Sample Sort - Data Init Runtime Times Matrix 2^18 Input ReverseSorted" width="49%" />
+  <img src="graphs/sampleSort/data_init_runtime_times_matrix_2^18_input_reverseSorted.jpeg" alt="Sample Sort - Data Init Runtime Times Matrix 2^28 Input ReverseSorted" width="49%" />
+  <img src="graphs/sampleSort/data_init_runtime_times_matrix_2^28_input_reverseSorted.jpeg" alt="Sample Sort - Data Init Runtime Times Matrix 2^18 Input ReverseSorted" width="49%" />
 </p>
 <p float="left">
-  <img src="graphs/sampleSort/correctness_check_times_matrix_2^28_input_reverseSorted.jpeg" alt="Sample Sort - Correctness Check Times Matrix 2^28 Input ReverseSorted" width="49%" />
   <img src="graphs/sampleSort/correctness_check_times_matrix_2^18_input_reverseSorted.jpeg" alt="Sample Sort - Correctness Check Times Matrix 2^18 Input ReverseSorted" width="49%" />
+  <img src="graphs/sampleSort/correctness_check_times_matrix_2^28_input_reverseSorted.jpeg" alt="Sample Sort - Correctness Check Times Matrix 2^28 Input ReverseSorted" width="49%" />
 </p>
 
 For the **correctness check** times with matrix sizes 2<sup>18</sup> and 2<sup>28</sup> using reverse sorted input, the results show a general decrease in time as the number of processes increases, though with some fluctuations. In 2<sup>18</sup>, there’s a notable spike at 64 processes where maximum times increase sharply before stabilizing as more processes are added, suggesting inefficiencies in communication at that point. In contrast, 2<sup>28</sup> demonstrates a smoother decline in times, with a sharp drop from 2 to 4 processes and steady times afterward, indicating good strong scaling for larger matrices.
