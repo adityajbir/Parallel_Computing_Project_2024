@@ -836,6 +836,13 @@ For the **correctness check** times with matrix sizes 2<sup>18</sup> and 2<sup>2
 
 In the **data initialization** times, 2<sup>18</sup> shows stable and low times until the process count exceeds 128, after which there is a dramatic spike at 512 processes, reflecting inefficiency at higher process counts for smaller matrices. For 2<sup>28</sup>, the initialization time decreases steadily with more processes, especially from 2 to 8 processes, before leveling off. This demonstrates strong scaling for larger matrices, with minimal variance and balanced workload distribution as processes increase.
 
+**Note**: The runs with 1024 as the number of proccesors all failed due to an issue with the cluster Grace where some of the nodes reported the following errors:
+```
+srun: error: c542: task 12: Exited with exit code 5
+srun: error: c433: task 8: Exited with exit code 5
+```
+This led to there being only 252 cali files instead of 280.
+
 ## **Radix Sort**:
 
 ### Note:
