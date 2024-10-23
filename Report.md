@@ -754,12 +754,12 @@ Overall, the computation phase scales well up to 32–64 processes, with diminis
 
 ### Data generation and Correctness check (Min, Max, Avg., Variance)
 <p float="left">
-  <img src="graphs/sampleSort/data_init_runtime_times_matrix_2^18_input_reverseSorted.jpeg" alt="Merge Sort - Data Init Runtime Times Matrix 2^28 Input ReverseSorted" width="49%" />
-  <img src="graphs/sampleSort/data_init_runtime_times_matrix_2^28_input_reverseSorted.jpeg" alt="Merge Sort - Data Init Runtime Times Matrix 2^18 Input ReverseSorted" width="49%" />
+  <img src="graphs/mergeSort/data_init_runtime_times_matrix_2^18_input_reverseSorted.jpeg" alt="Merge Sort - Data Init Runtime Times Matrix 2^28 Input ReverseSorted" width="49%" />
+  <img src="graphs/mergeSort/data_init_runtime_times_matrix_2^28_input_reverseSorted.jpeg" alt="Merge Sort - Data Init Runtime Times Matrix 2^18 Input ReverseSorted" width="49%" />
 </p>
 <p float="left">
-  <img src="graphs/sampleSort/correctness_check_times_matrix_2^18_input_reverseSorted.jpeg" alt="Merge Sort - Correctness Check Times Matrix 2^18 Input ReverseSorted" width="49%" />
-  <img src="graphs/sampleSort/correctness_check_times_matrix_2^28_input_reverseSorted.jpeg" alt="Merge Sort - Correctness Check Times Matrix 2^28 Input ReverseSorted" width="49%" />
+  <img src="graphs/mergeSort/correctness_check_times_matrix_2^18_input_reverseSorted.jpeg" alt="Merge Sort - Correctness Check Times Matrix 2^18 Input ReverseSorted" width="49%" />
+  <img src="graphs/mergeSort/correctness_check_times_matrix_2^28_input_reverseSorted.jpeg" alt="Merge Sort - Correctness Check Times Matrix 2^28 Input ReverseSorted" width="49%" />
 </p>
 
 These graphs measure **Data Generation and Correctness Check (Min, Max, Avg., Variance)** times across various process counts and matrix sizes for the reverse sorted input type. For large matrices like 2^28, the data generation time per rank decreases as processes increase, with significant improvement between 2 and 32 processes. In 2^18 at higher processor counts, the time increases which could indicate a bottleneck.
