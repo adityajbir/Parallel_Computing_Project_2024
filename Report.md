@@ -796,6 +796,9 @@ In the **data initialization** times, 2<sup>18</sup> shows stable and low times 
 
 ## **Radix Sort**:
 
+### Note:
+During the generation of the Radix Sort graphs, some issues were encountered with the `2^16` caliper files when processing random inputs. As a result, certain graphs appear cropped and may not include data for `2^16` in some instances. This problem affected the completeness of the visualizations, leading to the omission of `2^16` in some cases.
+
 ### Communication Large (Total Time)
 <p float="left">
   <img src="graphs/radixSort/comm_large_total_time_input_perturbed.jpeg" alt="Radix Sort - Comm Large Total Time Input Perturbed" width="49%" />
