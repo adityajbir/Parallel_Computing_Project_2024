@@ -702,6 +702,65 @@ perform runs that invoke algorithm2 for Sorted, ReverseSorted, and Random data).
 </p>
 
 ## **Sample Sort**:
+### Communication Large (Total Time)
+<p float="left">
+  <img src="graphs/sampleSort/Comm_large_total_time_input_perturbed.jpeg" alt="Sample Sort - Comm Large Total Time Input Perturbed" width="49%" />
+  <img src="graphs/sampleSort/Comm_large_total_time_input_random.jpeg" alt="Sample Sort - Comm Large Total Time Input Random" width="49%" />
+</p>
+<p float="left">
+  <img src="graphs/sampleSort/Comm_large_total_time_input_sorted.jpeg" alt="Sample Sort - Comm Large Total Time Input Sorted" width="49%" />
+  <img src="graphs/sampleSort/Comm_large_total_time_input_reverseSorted.jpeg" alt="Sample Sort - Comm Large Total Time Input ReverseSorted" width="49%" />
+</p>
+
+In these graphs, **strong scaling** (same problem size, increasing processors) performs well up to 64-128 processes, particularly for smaller matrix sizes like 2<sup>16</sup> and 2<sup>18</sup>. Beyond 128 processes, the communication overhead in the `comm_large` region becomes significant, causing total time to increase, especially for larger matrices like 2<sup>28</sup>. This shows that while strong scaling is effective up to a certain point, the overhead from adding more processes starts to outweigh the benefits for larger problems.
+
+For **weak scaling** (increasing both problem size and processors), the total time grows noticeably as matrix sizes and process counts rise, particularly when reaching 256-512 processes. Ideally, weak scaling should maintain constant total time, but here, larger matrices like 2<sup>28</sup> see steep increases, showing inefficiency. This is because communication overhead becomes a limiting factor, as more data needs to be exchanged between a growing number of processes. Overall, the algorithm scales better under strong scaling, while weak scaling struggles with high communication costs at larger scales.
+
+### Computation Large (Total Time)
+
+<p float="left">
+  <img src="graphs/sampleSort/comp_large_total_time_input_perturbed.jpeg" alt="Sample Sort - Comp Large Total Time Input Perturbed" width="49%" />
+  <img src="graphs/sampleSort/comp_large_total_time_input_random.jpeg" alt="Sample Sort - Comp Large Total Time Input Random" width="49%" />
+</p>
+<p float="left">
+  <img src="graphs/sampleSort/comp_large_total_time_input_sorted.jpeg" alt="Sample Sort - Comp Large Total Time Input Sorted" width="49%" />
+  <img src="graphs/sampleSort/comp_large_total_time_input_reverseSorted.jpeg" alt="Sample Sort - Comp Large Total Time Input ReverseSorted" width="49%" />
+</p>
+
+In these graphs, we observe that the total computation time for large data sets `comp_large` varies based on input type and reflects differences in **strong** and **weak scaling**.
+
+For **strong scaling** (same problem size, more processes), **random** and **sorted** inputs show good performance, with computation time decreasing as the number of processes increases, indicating efficient partitioning and workload distribution. Even for large matrices like 2^28, increasing processes reduces computation time. In contrast, **perturbed** and **reverse sorted** inputs show poor strong scaling, with computation times remaining high or even increasing as more processes are added, due to imbalanced partitioning.
+
+For **weak scaling** (increasing both problem size and processes), **random** and **sorted** inputs continue to scale better, while **perturbed** and **reverse sorted** inputs struggle. As the problem size and number of processes increase, these irregular inputs result in inefficient data distribution, limiting the benefits of additional processes.
+
+### Computation Large (Min, Max, Avg., Variance)
+
+<p float="left">
+  <img src="graphs/sampleSort/comm_large_times_matrix_2^16_input_random.jpeg" alt="Sample Sort - Comm Large Times Matrix 2^16 Input Random" width="49%" />
+  <img src="graphs/sampleSort/comm_large_times_matrix_2^20_input_random.jpeg" alt="Sample Sort - Comm Large Times Matrix 2^20 Input Random" width="49%" />
+</p>
+<p float="left">
+  <img src="graphs/sampleSort/comm_large_times_matrix_2^24_input_reverseSorted.jpeg" alt="Sample Sort - Comm Large Times Matrix 2^24 Input ReverseSorted" width="49%" />
+  <img src="graphs/sampleSort/comm_large_times_matrix_2^28_input_random.jpeg" alt="Sample Sort - Comm Large Times Matrix 2^28 Input Random" width="49%" />
+</p>
+
+These graphs highlight **strong scaling**, where the problem size remains constant as the number of processes increases. For all matrix sizes, there’s a spike in communication time at 4 processes, particularly for larger matrices like 2<sup>28</sup>, due to fewer processes handling large workloads. As more processes are added, communication times drop and stabilize, showing effective strong scaling for larger matrices like 2<sup>28</sup> and 2<sup>24</sup>, with both time and variance per rank decreasing.
+
+However, 2<sup>20</sup> shows irregular results, with communication times fluctuating more noticeably as the number of processes increases, especially beyond 64 processes. This irregularity suggests that adding more processes for smaller problem sizes leads to inconsistent scaling due to communication overhead. Overall, strong scaling is effective for larger matrices, while smaller matrices like 2<sup>16</sup> and 2<sup>20</sup> experience less predictable improvements, with 2<sup>20</sup> showing the most irregular scaling behavior.
+
+### Data generation and Correctness check (Min, Max, Avg., Variance)
+<p float="left">
+  <img src="graphs/sampleSort/data_init_runtime_times_matrix_2^28_input_reverseSorted.jpeg" alt="Sample Sort - Data Init Runtime Times Matrix 2^28 Input ReverseSorted" width="49%" />
+  <img src="graphs/sampleSort/data_init_runtime_times_matrix_2^18_input_reverseSorted.jpeg" alt="Sample Sort - Data Init Runtime Times Matrix 2^18 Input ReverseSorted" width="49%" />
+</p>
+<p float="left">
+  <img src="graphs/sampleSort/correctness_check_times_matrix_2^18_input_reverseSorted.jpeg" alt="Sample Sort - Correctness Check Times Matrix 2^18 Input ReverseSorted" width="49%" />
+  <img src="graphs/sampleSort/correctness_check_times_matrix_2^28_input_reverseSorted.jpeg" alt="Sample Sort - Correctness Check Times Matrix 2^28 Input ReverseSorted" width="49%" />
+</p>
+
+For the **correctness check** times with matrix sizes 2<sup>18</sup> and 2<sup>28</sup> using reverse sorted input, the results show a general decrease in time as the number of processes increases, though with some fluctuations. In 2<sup>18</sup>, there’s a notable spike at 64 processes where maximum times increase sharply before stabilizing as more processes are added, suggesting inefficiencies in communication at that point. In contrast, 2<sup>28</sup> demonstrates a smoother decline in times, with a sharp drop from 2 to 4 processes and steady times afterward, indicating good strong scaling for larger matrices.
+
+In the **data initialization** times, 2<sup>18</sup> shows stable and low times until the process count exceeds 128, after which there is a dramatic spike at 512 processes, reflecting inefficiency at higher process counts for smaller matrices. For 2<sup>28</sup>, the initialization time decreases steadily with more processes, especially from 2 to 8 processes, before leveling off. This demonstrates strong scaling for larger matrices, with minimal variance and balanced workload distribution as processes increase.
 
 ## **Radix Sort**:
 <p float="left">
