@@ -714,7 +714,7 @@ In **weak scaling**, where both the input size and processor count grow proporti
 - Smaller Input Sizes (2<sup>16</sup> to 2<sup>20</sup>): The computation time remains relatively constant, indicating that the algorithm scales well with increasing processors for smaller datasets.
 - Larger Input Sizes (2<sup>24</sup> and above): There is a noticeable increase in computation time, especially with 128+ processors, indicating that weak scaling becomes less efficient for large inputs, likely due to overhead like communication and data distribution inefficiencies across processors.
 
-Both scaling types reveal that smaller inputs benefit more from parallelization, while larger inputs face performance bottlenecks as processor counts increase, particularly in the sorted and reverse-sorted input types.
+These trends are consistent across the different input types, except for a small peak in the Sorted input type when 64 processes are allocated for sorting an already sorted array. Both scaling types reveal that smaller inputs benefit more from parallelization, while larger inputs face performance bottlenecks as processor counts increase, particularly in the sorted and reverse-sorted input types.
 
 ### Communication Large (Total Time)
 <p float="left">
