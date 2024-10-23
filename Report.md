@@ -702,6 +702,20 @@ perform runs that invoke algorithm2 for Sorted, ReverseSorted, and Random data).
   <img src="graphs/bitonicSort/comp_large_total_time_input_reverseSorted.jpeg" alt="Bitonic Sort - Comp Large Total Time Input ReverseSorted" width="49%" />
 </p>
 
+Above we can see 4 Total Computation Time vs Number of Processes plots for each data input type: Perturbed, Random, Sorted, and Reverse Sorted. These graphs are good examples of both **strong scaling** as we can observe how the parallel bitonic sorting algorithm performs with an increasing number of processors for each of the input sizes, and **weak scaling** when we observe each data point for the different input sizes across the number of processors.
+
+In **strong scaling**, where we analyze the performance with increasing processor counts for fixed input sizes, the parallel bitonic sorting algorithm shows:
+
+- Smaller Input Sizes (2<sup>16</sup> to 2<sup>24</sup>): The total computation time remains fairly consistent across increasing processor counts, suggesting that for smaller inputs, parallelization provides diminishing returns due to overhead like communication and synchronization costs.
+- Larger Input Sizes (2<sup>26</sup> and 2<sup>28</sup>): Computation time increases more sharply as the number of processors grows. Larger datasets incur more computational work and are more sensitive to parallelization inefficiencies, particularly visible in the perturbed and random inputs.
+
+In **weak scaling**, where both the input size and processor count grow proportionally, the total computation time ideally should remain constant:
+
+- Smaller Input Sizes (2<sup>16</sup> to 2<sup>20</sup>): The computation time remains relatively constant, indicating that the algorithm scales well with increasing processors for smaller datasets.
+- Larger Input Sizes (2<sup>24</sup> and above): There is a noticeable increase in computation time, especially with 128+ processors, indicating that weak scaling becomes less efficient for large inputs, likely due to overhead like communication and data distribution inefficiencies across processors.
+
+Both scaling types reveal that smaller inputs benefit more from parallelization, while larger inputs face performance bottlenecks as processor counts increase, particularly in the sorted and reverse-sorted input types.
+
 ### Communication Large (Total Time)
 <p float="left">
   <img src="graphs/bitonicSort/comm_large_total_time_input_perturbed.jpeg" alt="Bitonic Sort - Comm Large Total Time Input Perturbed" width="49%" />
@@ -712,6 +726,20 @@ perform runs that invoke algorithm2 for Sorted, ReverseSorted, and Random data).
   <img src="graphs/bitonicSort/comm_large_total_time_input_reverseSorted.jpeg" alt="Bitonic Sort - Comm Large Total Time Input ReverseSorted" width="49%" />
 </p>
 
+The four plots provided illustrate the Large Total Communication Time versus the number of processors for each data input type: Perturbed, Random, Sorted, and Reverse Sorted. The large communication time in this context refers to the time taken by MPI signals (such as MPI_Scatterv and MPI_Gatherv) to communicate data between the processors during the parallel execution of the bitonic sort algorithm.
+
+In **strong scaling**, where the input size is fixed, and the number of processors increases:
+
+- Smaller Input Sizes (2<sup>16</sup> to 2<sup>24</sup>): Across all input types (perturbed, random, sorted, and reverse sorted), communication times remain minimal at lower processor counts (up to 64 processors). However, as the number of processors increases (beyond 128), there is a slight rise, and at 512 processors, communication time starts growing more noticeably.
+- Larger Input Sizes (2<sup>26</sup> and 2<sup>28</sup>): For larger input sizes, communication time increases rapidly, especially after 128 processors. The rise becomes steepest at 512 processors, reflecting the significant communication overhead when distributing and collecting data across many processors. This increase is consistent across all input types.
+
+In **weak scaling**, where both the input size and processor count increase proportionally:
+
+- Smaller Input Sizes (2<sup>16</sup> to 2<sup>20</sup>): Communication times remain relatively constant as the processor count increases, indicating good weak scaling performance. The MPI communication overhead does not significantly impact performance for small datasets.
+- Larger Input Sizes (2<sup>24</sup> to 2<sup>28</sup>): Communication times increase notably with larger input sizes, especially beyond 64 processors. For 2<sup>28</sup>, the communication cost rises sharply at 256 and 512 processors, signaling that weak scaling becomes less efficient as both the dataset size and processor count increase, with MPI communication becoming a significant bottleneck.
+
+Across all input types and sizes, communication overhead becomes more apparent as processor count and data size increase, suggesting room for optimization in the MPI communication methods used in the parallel bitonic sorting algorithm.
+
 ### Computation Large (Min, Max, Avg., Variance)
 <p float="left">
   <img src="graphs/bitonicSort/comp_large_times_matrix_2^16_input_random.jpeg" alt="Bitonic Sort - Comp Large Min,Max,Avg, Variance Time Input Random" width="49%" />
@@ -721,7 +749,13 @@ perform runs that invoke algorithm2 for Sorted, ReverseSorted, and Random data).
   <img src="graphs/bitonicSort/comp_large_times_matrix_2^24_input_random.jpeg" alt="Bitonic Sort - Comp Large Min,Max,Avg, Variance Time Input Random" width="49%" />
   <img src="graphs/bitonicSort/comp_large_times_matrix_2^28_input_random.jpeg" alt="Bitonic Sort - Comp Large Min,Max,Avg, Variance Time Input Random" width="49%" />
 </p>
+The analysis of the computation time plots (min, max, average, and variance) across varying matrix sizes and processor counts highlights how the parallel bitonic sort algorithm scales with both strong and weak scaling approaches. For smaller matrix sizes, such as 2<sup>16</sup>, the algorithm shows strong scaling up to 128 processors. However, beyond that, particularly at 256 and 512 processors, there is an increase in both average and maximum times, indicating inefficiencies likely caused by communication overhead and synchronization costs. This suggests that for small datasets, adding more processors does not yield further performance benefits and can, in fact, degrade performance due to overhead.
 
+For larger matrix sizes like 2<sup>20</sup>, 2<sup>24</sup>, and 2<sup>28</sup>, the algorithm demonstrates better strong scaling. The average and maximum times decrease smoothly as the number of processors increases, with no significant jumps or inefficiencies, even at 512 processors. This shows that the algorithm can efficiently handle larger datasets by distributing the computational workload across more processors. Importantly, the variance in computation times remains close to zero across all processor counts, indicating that the workload is evenly balanced among the processors, which is crucial for maintaining efficiency in a parallel system.
+
+In terms of weak scaling, where both input size and processor count increase proportionally, the algorithm performs well. Across all matrix sizes, the average and maximum times per processor steadily decrease with more processors, and the variance remains minimal, reflecting good load balancing. For larger input sizes like 2<sup>28</sup>, although the absolute computation time is higher due to the size of the data, the system effectively reduces the per-rank computation time as processors are added.
+
+In summary, the parallel bitonic sorting algorithm scales effectively for large datasets with minimal variance in computation times across processors, reflecting a well-balanced workload distribution. However, for smaller datasets, adding too many processors introduces inefficiencies, particularly at higher processor counts, due to communication overhead.
 
 ### Data generation and Correctness check (Min, Max, Avg., Variance)
 <p float="left">
@@ -732,6 +766,14 @@ perform runs that invoke algorithm2 for Sorted, ReverseSorted, and Random data).
   <img src="graphs/bitonicSort/correctness_check_times_matrix_2^18_input_reverseSorted.jpeg" alt="Bitonic Sort - Correctness Check Input Reverse Sorted 2^18" width="49%" />
   <img src="graphs/bitonicSort/correctness_check_times_matrix_2^28_input_reverseSorted.jpeg" alt="Bitonic Sort - Comm Large Total Time Input ReverseSorted" width="49%" />
 </p>
+
+The plots above show the time it takes for generating a reverse sorted array in a parallel manner, as well as the time it takes for checking that the array is sorted (in a parallel manner too).
+
+The analysis of data generation and correctness check times for reverse-sorted input arrays highlights generally good scaling performance, especially for larger matrix sizes. When generating the reverse-sorted arrays in parallel, the system shows smooth and efficient scaling for larger datasets like 2<sup>28</sup>. In these cases, both average and maximum times per processor decrease as more processors are added, reflecting good use of parallelism. However, for smaller datasets like 2<sup>18</sup>, there’s a noticeable spike in time at 64 processors, likely due to inefficiencies in how the data is distributed or synchronized at that point. Beyond this, the times level out, indicating that the system adjusts and scales more effectively with larger numbers of processors.
+
+The correctness check, which ensures the array has been sorted properly, also performs well for the most part. Larger datasets scale consistently, while smaller datasets show minor inefficiencies, particularly at 64 processors, where there’s a slight increase in both the maximum time and variance. These small spikes are probably due to communication overhead or synchronization delays as the system checks the sorted array in parallel.
+
+Despite these occasional hiccups with smaller datasets, the parallel algorithm generally manages both data generation and correctness checking efficiently. The low variance across all processor counts suggests that the workload is well balanced, which is key for maintaining performance in a parallel environment.
 
 ## **Sample Sort**:
 ### Communication Large (Total Time)
