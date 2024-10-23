@@ -983,7 +983,7 @@ The graphs depict performance metrics (Min, Max, Avg, and Variance of time per r
 
 This indicates that parallelization is effective up to a certain number of processes, beyond which the benefit diminishes. The variance remains low across most of the graphs, showing that the workload is distributed fairly evenly across the processes, except for minor spikes in some cases (e.g., for `2^18` with 128 or 512 processes), which may suggest occasional load imbalances or communication overhead. Overall, parallelization provides clear time reduction, especially for larger matrices, but the returns diminish as the number of processes increases, highlighting a balance between computation time and communication overhead.
 
-##########################################################################################################
+
 
 
 ## 5. Presentation
