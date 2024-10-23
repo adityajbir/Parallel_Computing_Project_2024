@@ -688,8 +688,88 @@ perform runs that invoke algorithm2 for Sorted, ReverseSorted, and Random data).
     - Total time
     - Variance time/rank
 
-#######################################Performance Evaluation ##########################################
+## **Note**:
+
+Due to issues with grace and as communicated by the TAs, the 1024 processors runs do not work currently and were not included in the analysis
+
+
 ## **Merge Sort**:
+
+### Communication Large (Total Time)
+<p float="left">
+  <img src="graphs/mergeSort/comm_large_total_time_input_perturbed.jpeg" alt="Merge Sort - Comm Large Total Time Input Perturbed" width="49%" />
+  <img src="graphs/mergeSort/comm_large_total_time_input_random.jpeg" alt="Merge Sort - Comm Large Total Time Input Random" width="49%" />
+</p>
+<p float="left">
+  <img src="graphs/mergeSort/comm_large_total_time_input_sorted.jpeg" alt="Merge Sort - Comm Large Total Time Input Sorted" width="49%" />
+  <img src="graphs/mergeSort/comm_large_total_time_input_reverseSorted.jpeg" alt="Merge Sort - Comm Large Total Time Input ReverseSorted" width="49%" />
+</p>
+
+In these graphs, strong scaling performs well up to 64–128 processes, especially for smaller matrices like 2^16 and 2^18. Beyond 128 processes, communication overhead in the `comm_large` region increases total time, particularly for larger matrices. There is a random spike with 2^22 which could indicate some issue.This shows that while strong scaling is initially effective, adding more processes eventually offsets the computational benefits due to rising communication costs.
+
+For weak scaling, total time increases as both matrix size and process count grow, especially with 256–512 processes. Ideally, weak scaling would maintain constant execution time, but since it is increasing constantly, it could indicate inefficiency. This is due to higher communication overhead and synchronization delays, which grow with the number of processes.
+
+Different input types can further impact performance, with bigger increases at higher process counts. Across all inputs, a threshold emerges around 128–256 processes, where communication bottlenecks dominate. 
+
+
+
+### Computation Large (Total Time)
+
+<p float="left">
+  <img src="graphs/mergeSort/comp_large_total_time_input_perturbed.jpeg" alt="Merge Sort - Comp Large Total Time Input Perturbed" width="49%" />
+  <img src="graphs/mergeSort/comp_large_total_time_input_random.jpeg" alt="Merge Sort - Comp Large Total Time Input Random" width="49%" />
+</p>
+<p float="left">
+  <img src="graphs/mergeSort/comp_large_total_time_input_sorted.jpeg" alt="Merge Sort - Comp Large Total Time Input Sorted" width="49%" />
+  <img src="graphs/mergeSort/comp_large_total_time_input_reverseSorted.jpeg" alt="Merge Sort - Comp Large Total Time Input ReverseSorted" width="49%" />
+</p>
+
+In these graphs, which measure **Computation Large (Total Time)**, strong scaling performs well up to 32–64 processes, especially on smaller matrices. However, as the number of processors increases, communication and computational overhead gradually rise, particularly for larger matrices like 2^28. For example, with 512 processors, the total time increases significantly, showing that the gains from additional processors are limited by increased synchronization and load imbalance, leading to diminishing returns.
+
+For weak scaling, the total time increases steadily as both matrix size and process count rise, especially at 256–512 processes. Ideally, weak scaling would maintain consistent performance, but larger matrices like 2^28 demonstrate noticeable increases in execution time across all input types, suggesting inefficiencies. The consistent growth in time, particularly for sorted and reverse sorted inputs, indicates that the computational workload doesn't scale perfectly, likely due to the need for more inter-process synchronization as processes grow.
+
+Across all input types, smaller matrices remain stable across most process counts, showing minimal increase in total time. However, larger matrices encounter greater performance challenges at higher process counts, with random and reverse sorted inputs seeing more pronounced increases. This suggests that the computational workload there is an inefficiency or it is harder to sort with that particular input type.
+
+
+
+### Computation Large (Min, Max, Avg., Variance)
+
+<p float="left">
+  <img src="graphs/mergeSort/comp_large_times_matrix_2^16_input_random.jpeg" alt="Merge Sort - Comm Large Times Matrix 2^16 Input Random" width="49%" />
+  <img src="graphs/mergeSort/comp_large_times_matrix_2^20_input_random.jpeg" alt="Merge Sort - Comm Large Times Matrix 2^20 Input Random" width="49%" />
+</p>
+<p float="left">
+  <img src="graphs/mergeSort/comp_large_times_matrix_2^24_input_reverseSorted.jpeg" alt="Merge Sort - Comm Large Times Matrix 2^24 Input ReverseSorted" width="49%" />
+  <img src="graphs/mergeSort/comp_large_times_matrix_2^28_input_random.jpeg" alt="Merge Sort - Comm Large Times Matrix 2^28 Input Random" width="49%" />
+</p>
+
+These graphs measure **Computation Large (Min, Max, Avg., Variance)** times across various numbers of processes for matrix sizes ranging from 2^16 to 2^28 with random and reverse sorted input types. Overall, for smaller matrices such like 2^16 and 2^20, the average and max times per rank drop significantly up to 32 processes, showing good **strong scaling**. However, beyond 32 processes, the times stabilize, with communication overhead limiting further improvements. For larger matrices, such as 2^24 and 2^28, we see an decrease in average times up to 32 processes, then diminishing returns around 64 processes and beyond.
+
+The **variance** in time per rank is relatively low for smaller matrices. However, for larger matrices, the variance starts high, especially for 2^28 with random inputs, and gradually decreases as the number of processes increases.. For reverse sorted inputs, variance also peaks at low process counts but stabilizes beyond 64 processes.
+
+In terms of **strong scaling**, as the number of processors increase, the times are decreasing which means the algorithm is scaling well. Because as you add more processors, ideally times should go down and that is happening.
+
+Overall, the computation phase scales well up to 32–64 processes, with diminishing returns beyond that point, especially for larger matrices. The min times remain stable across all configurations, showing baseline efficiency. The larger input sizes show more variance but that can be expected.
+
+
+### Data generation and Correctness check (Min, Max, Avg., Variance)
+<p float="left">
+  <img src="graphs/sampleSort/data_init_runtime_times_matrix_2^18_input_reverseSorted.jpeg" alt="Merge Sort - Data Init Runtime Times Matrix 2^28 Input ReverseSorted" width="49%" />
+  <img src="graphs/sampleSort/data_init_runtime_times_matrix_2^28_input_reverseSorted.jpeg" alt="Merge Sort - Data Init Runtime Times Matrix 2^18 Input ReverseSorted" width="49%" />
+</p>
+<p float="left">
+  <img src="graphs/sampleSort/correctness_check_times_matrix_2^18_input_reverseSorted.jpeg" alt="Merge Sort - Correctness Check Times Matrix 2^18 Input ReverseSorted" width="49%" />
+  <img src="graphs/sampleSort/correctness_check_times_matrix_2^28_input_reverseSorted.jpeg" alt="Merge Sort - Correctness Check Times Matrix 2^28 Input ReverseSorted" width="49%" />
+</p>
+
+These graphs measure **Data Generation and Correctness Check (Min, Max, Avg., Variance)** times across various process counts and matrix sizes for the reverse sorted input type. For large matrices like 2^28, the data generation time per rank decreases as processes increase, with significant improvement between 2 and 32 processes. In 2^18 at higher processor counts, the time increases which could indicate a bottleneck.
+
+The **variance** in correctness check times varies significantly for larger matrices like 2^28. As processes increase, the variance decreases, suggesting more stable execution with distributed workloads. For smaller matrices (2^18), the correctness check times rise gradually with process count, reflecting communication overhead and synchronization bottlenecks as more processors participate in the checks. While the min times per rank remain consistently low across all scenarios, the rising average and max times highlight growing inefficiencies at high process counts.
+
+For **strong scaling**, increasing the number of processes helps improve performance, particularly during data generation for larger matrices. However, the benefits taper off beyond 32–64 processes, where overhead starts to outweigh computational gains. For **weak scaling**, where both matrix size and process count increase together, smaller matrices and larger matrices relationships make sense.
+
+Overall, the data generation stage benefits from parallelism, especially with larger matrices. The correctness check phase faces greater challenges, with increasing delays from synchronization overhead. 
+
 
 ## **Bitonic Sort**:
 ### Computation Large (Total Time)
