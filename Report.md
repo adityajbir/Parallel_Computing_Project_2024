@@ -735,12 +735,12 @@ Across all input types, smaller matrices remain stable across most process count
 ### Computation Large (Min, Max, Avg., Variance)
 
 <p float="left">
-  <img src="graphs/mergeSort/comp_large_times_matrix_2^16_input_random.jpeg" alt="Merge Sort - Comm Large Times Matrix 2^16 Input Random" width="49%" />
-  <img src="graphs/mergeSort/comp_large_times_matrix_2^20_input_random.jpeg" alt="Merge Sort - Comm Large Times Matrix 2^20 Input Random" width="49%" />
+  <img src="graphs/mergeSort/comp_large_times_matrix_2^16_input_random.jpeg" alt="Merge Sort - Comp Large Times Matrix 2^16 Input Random" width="49%" />
+  <img src="graphs/mergeSort/comp_large_times_matrix_2^20_input_random.jpeg" alt="Merge Sort - Comp Large Times Matrix 2^20 Input Random" width="49%" />
 </p>
 <p float="left">
-  <img src="graphs/mergeSort/comp_large_times_matrix_2^24_input_reverseSorted.jpeg" alt="Merge Sort - Comm Large Times Matrix 2^24 Input ReverseSorted" width="49%" />
-  <img src="graphs/mergeSort/comp_large_times_matrix_2^28_input_random.jpeg" alt="Merge Sort - Comm Large Times Matrix 2^28 Input Random" width="49%" />
+  <img src="graphs/mergeSort/comp_large_times_matrix_2^24_input_reverseSorted.jpeg" alt="Merge Sort - Comp Large Times Matrix 2^24 Input ReverseSorted" width="49%" />
+  <img src="graphs/mergeSort/comp_large_times_matrix_2^28_input_random.jpeg" alt="Merge Sort - Comp Large Times Matrix 2^28 Input Random" width="49%" />
 </p>
 
 These graphs measure **Computation Large (Min, Max, Avg., Variance)** times across various numbers of processes for matrix sizes ranging from 2^16 to 2^28 with random and reverse sorted input types. Overall, for smaller matrices such like 2^16 and 2^20, the average and max times per rank drop significantly up to 32 processes, showing good **strong scaling**. However, beyond 32 processes, the times stabilize, with communication overhead limiting further improvements. For larger matrices, such as 2^24 and 2^28, we see an decrease in average times up to 32 processes, then diminishing returns around 64 processes and beyond.
