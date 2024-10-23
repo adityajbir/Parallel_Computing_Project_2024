@@ -692,6 +692,14 @@ perform runs that invoke algorithm2 for Sorted, ReverseSorted, and Random data).
 ## **Merge Sort**:
 
 ## **Bitonic Sort**:
+<p float="left">
+  <img src="graphs/bitonicSort/comp_large_total_time_input_perturbed.jpeg" alt="Bitonic Sort - Comp Large Total Time Input Perturbed" width="49%" />
+  <img src="graphs/bitonicSort/comp_large_total_time_input_random.jpeg" alt="Bitonic Sort - Comp Large Total Time Input Random" width="49%" />
+</p>
+<p float="left">
+  <img src="graphs/bitonicSort/comp_large_total_time_input_sorted.jpeg" alt="Bitonic Sort - Comp Large Total Time Input Sorted" width="49%" />
+  <img src="graphs/bitonicSort/comp_large_total_time_input_reverseSorted.jpeg" alt="Bitonic Sort - Comp Large Total Time Input ReverseSorted" width="49%" />
+</p>
 
 ## **Sample Sort**:
 
