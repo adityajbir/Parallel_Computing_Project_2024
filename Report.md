@@ -807,7 +807,7 @@ For **strong scaling** (same problem size, more processes), **random** and **sor
 
 For **weak scaling** (increasing both problem size and processes), **random** and **sorted** inputs continue to scale better, while **perturbed** and **reverse sorted** inputs struggle. As the problem size and number of processes increase, these irregular inputs result in inefficient data distribution, limiting the benefits of additional processes.
 
-### Computation Large (Min, Max, Avg., Variance)
+### Communication Large (Min, Max, Avg., Variance)
 
 <p float="left">
   <img src="graphs/sampleSort/comm_large_times_matrix_2^16_input_random.jpeg" alt="Sample Sort - Comm Large Times Matrix 2^16 Input Random" width="49%" />
