@@ -795,6 +795,21 @@ For the **correctness check** times with matrix sizes 2<sup>18</sup> and 2<sup>2
 In the **data initialization** times, 2<sup>18</sup> shows stable and low times until the process count exceeds 128, after which there is a dramatic spike at 512 processes, reflecting inefficiency at higher process counts for smaller matrices. For 2<sup>28</sup>, the initialization time decreases steadily with more processes, especially from 2 to 8 processes, before leveling off. This demonstrates strong scaling for larger matrices, with minimal variance and balanced workload distribution as processes increase.
 
 ## **Radix Sort**:
+
+### Communication Large (Total Time)
+<p float="left">
+  <img src="graphs/radixSort/Comm_large_total_time_input_perturbed.jpeg" alt="Radix Sort - Comm Large Total Time Input Perturbed" width="49%" />
+  <img src="graphs/radixSort/Comm_large_total_time_input_random.jpeg" alt="Radix Sort - Comm Large Total Time Input Random" width="49%" />
+</p>
+<p float="left">
+  <img src="graphs/radixSort/Comm_large_total_time_input_sorted.jpeg" alt="Radix Sort - Comm Large Total Time Input Sorted" width="49%" />
+  <img src="graphs/radixSort/Comm_large_total_time_input_reverseSorted.jpeg" alt="Radix Sort - Comm Large Total Time Input ReverseSorted" width="49%" />
+</p>
+
+The graphs show the communication time across multiple processes for different matrix sizes (`2^16` to `2^28`) and input types (perturbed, random, sorted, reverse sorted). Communication time increases as the number of processes rises, especially for larger matrices (`2^28`, `2^26`), where the sharpest increase occurs beyond 128 processes. Smaller matrices (`2^16`, `2^18`) have minimal communication overhead. Overall, while parallelization improves computation time, communication overhead grows significantly with larger data sets and higher process counts, indicating diminishing returns beyond a certain number of processes due to the increased communication cost.
+
+
+### Computation Large (Total Time)
 <p float="left">
   <img src="graphs/radixSort/comp_large_total_time_input_perturbed.jpeg" alt="Radix Sort - Comp Large Total Time Input Perturbed" width="49%" />
   <img src="graphs/radixSort/comp_large_total_time_input_random.jpeg" alt="Radix Sort - Comp Large Total Time Input Random" width="49%" />
@@ -803,9 +818,11 @@ In the **data initialization** times, 2<sup>18</sup> shows stable and low times 
   <img src="graphs/radixSort/comp_large_total_time_input_sorted.jpeg" alt="Radix Sort - Comp Large Total Time Input Sorted" width="49%" />
   <img src="graphs/radixSort/comp_large_total_time_input_reverseSorted.jpeg" alt="Radix Sort - Comp Large Total Time Input ReverseSorted" width="49%" />
 </p>
-<p float="left">
-  <img src="graphs/radixSort/comm_large_total_time_input_reverseSorted.jpeg" alt="Radix Sort - Comm Large Total Time Input ReverseSorted" width="49%" />
-</p>
+
+The graphs illustrate the total computation time for different matrix sizes (`2^16` to `2^28`) and input types (perturbed, random, sorted, reverse sorted) as the number of processes increases from 2 to 512. Across all input types and matrix sizes, there is a clear trend of decreasing computation time with increasing processes, particularly for larger matrices like `2^24`, `2^26`, and `2^28`. These large matrices see a sharp reduction in time as the number of processes increases up to around 64, beyond which further reductions are minimal, indicating diminishing returns. For smaller matrices (`2^16`), while there is some improvement, the gains are much less pronounced due to the relatively small problem size. The input types do not significantly impact the general trend, though larger matrices consistently show the most benefit from parallelization across all input types. Overall, the RadixSort implementation demonstrates strong scalability for large matrix sizes, with the most significant improvements occurring as the number of processes increases up to around 64, after which the performance gains taper off.
+
+
+### Computation Large (Min, Max, Avg., Variance)
 <p float="left">
   <img src="graphs/radixSort/comm_large_times_matrix_2^16_input_reverseSorted.jpeg" alt="Radix Sort - Comm Large Times Matrix 2^16 Input ReverseSorted" width="49%" />
   <img src="graphs/radixSort/comm_large_times_matrix_2^20_input_perturbed.jpeg" alt="Radix Sort - Comm Large Times Matrix 2^20 Input Perturbed" width="49%" />
@@ -814,6 +831,24 @@ In the **data initialization** times, 2<sup>18</sup> shows stable and low times 
   <img src="graphs/radixSort/comm_large_times_matrix_2^24_input_sorted.jpeg" alt="Radix Sort - Comm Large Times Matrix 2^24 Input Sorted" width="49%" />
   <img src="graphs/radixSort/comm_large_times_matrix_2^28_input_perturbed.jpeg" alt="Radix Sort - Comm Large Times Matrix 2^28 Input Perturbed" width="49%" />
 </p>
+
+The graphs depict performance metrics for a parallel RadixSort implementation across different matrix sizes (`2^16`, `2^20`, `2^24`, `2^28`) and various numbers of processes. The metrics include the minimum, maximum, average, and variance in time per rank. For smaller matrices (`2^16` and `2^20`), there is a noticeable spike in max time per rank when using intermediate process counts (e.g., 64 and 128 processes), indicating load imbalance and communication overhead. 
+
+This suggests that **weak scaling** is less efficient for these sizes, as the increase in processes does not proportionally improve performance. In contrast, for larger matrices (`2^24` and `2^28`), all time metrics generally decrease as more processes are added, demonstrating better scalability and distribution of the workload, which reflects **strong scaling**. Larger matrices particularly benefit from higher process counts, as seen by the sharp reductions in time per rank, indicating that the parallel RadixSort implementation scales well in both strong and weak scaling scenarios when matrix sizes are large. However, for smaller matrices, the algorithm struggles to fully capitalize on the increased number of processes, likely due to the overhead outweighing the benefits.
+
+### Data generation and Correctness check (Min, Max, Avg., Variance)
+
+<p float="left">
+  <img src="graphs/radixSort/data_init_runtime_times_matrix_2^28_input_reverseSorted.jpeg" alt="Sample Sort - Data Init Runtime Times Matrix 2^28 Input ReverseSorted" width="49%" />
+  <img src="graphs/radixSort/data_init_runtime_times_matrix_2^18_input_reverseSorted.jpeg" alt="Sample Sort - Data Init Runtime Times Matrix 2^18 Input ReverseSorted" width="49%" />
+</p>
+<p float="left">
+  <img src="graphs/radixSort/correctness_check_times_matrix_2^18_input_reverseSorted.jpeg" alt="Sample Sort - Correctness Check Times Matrix 2^18 Input ReverseSorted" width="49%" />
+  <img src="graphs/radixSort/correctness_check_times_matrix_2^28_input_reverseSorted.jpeg" alt="Sample Sort - Correctness Check Times Matrix 2^28 Input ReverseSorted" width="49%" />
+</p>
+
+The graphs depict performance metrics (Min, Max, Avg, and Variance of time per rank) for data generation and correctness check in a parallel system, across different matrix sizes (`2^18`, `2^28`) and varying numbers of processes. For larger matrices like `2^28`, as the number of processes increases, the time metrics (Min, Max, Avg) decrease significantly up to around 64 processes, after which they level off. This indicates that parallelization is effective up to a certain number of processes, beyond which the benefit diminishes. The variance remains low across most of the graphs, showing that the workload is distributed fairly evenly across the processes, except for minor spikes in some cases (e.g., for `2^18` with 128 or 512 processes), which may suggest occasional load imbalances or communication overhead. Overall, parallelization provides clear time reduction, especially for larger matrices, but the returns diminish as the number of processes increases, highlighting a balance between computation time and communication overhead.
+
 ##########################################################################################################
 
 
