@@ -6,10 +6,12 @@ void compare_low(int j, std::vector<int>& local, int local_size, int rank, int s
     int partner = rank ^ (1 << j);
 
     // --- Start Communication (Send/Recv local max/min)
+    CALI_MARK_BEGIN(CALI_COMM);
     CALI_MARK_BEGIN(CALI_COMM_SMALL);
     MPI_Send(&local[local_size - 1], 1, MPI_INT, partner, 0, MPI_COMM_WORLD);
     MPI_Recv(&min, 1, MPI_INT, partner, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     CALI_MARK_END(CALI_COMM_SMALL);
+    CALI_MARK_END(CALI_COMM);
     // --- End Communication
 
     // Init buffers for exchange
@@ -17,6 +19,7 @@ void compare_low(int j, std::vector<int>& local, int local_size, int rank, int s
     std::vector<int> buffer_receive(local_size + 1);
 
     // --- Start Computation (Identifying elements to send)
+    CALI_MARK_BEGIN(CALI_COMP);
     CALI_MARK_BEGIN(CALI_COMP_LARGE);
     int send_counter = 0;
     for (int i = local_size - 1; i >= 0; i--) {
@@ -29,16 +32,20 @@ void compare_low(int j, std::vector<int>& local, int local_size, int rank, int s
     }
     buffer_send[0] = send_counter;  // First element is the count
     CALI_MARK_END(CALI_COMP_LARGE);
+    CALI_MARK_END(CALI_COMP);
     // --- End Computation
 
     // --- Start Communication (Exchange buffers)
+    CALI_MARK_BEGIN(CALI_COMM);
     CALI_MARK_BEGIN(CALI_COMM_SMALL);
     MPI_Send(buffer_send.data(), send_counter + 1, MPI_INT, partner, 0, MPI_COMM_WORLD);
     MPI_Recv(buffer_receive.data(), local_size + 1, MPI_INT, partner, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     CALI_MARK_END(CALI_COMM_SMALL);
+    CALI_MARK_END(CALI_COMM);
     // --- End Communication
 
     // --- Start Computation (Merge buffers)
+    CALI_MARK_BEGIN(CALI_COMP);
     CALI_MARK_BEGIN(CALI_COMP_LARGE);
     std::vector<int> temp_array = local;
     int buffer_size = buffer_receive[0];
@@ -56,6 +63,7 @@ void compare_low(int j, std::vector<int>& local, int local_size, int rank, int s
     }
     std::sort(local.begin(), local.end());
     CALI_MARK_END(CALI_COMP_LARGE);
+    CALI_MARK_END(CALI_COMP);
     // --- End Computation
 }
 
@@ -65,10 +73,12 @@ void compare_high(int j, std::vector<int>& local, int local_size, int rank, int 
     int partner = rank ^ (1 << j);
 
     // --- Start Communication (Send/Recv local min/max)
+    CALI_MARK_BEGIN(CALI_COMM);
     CALI_MARK_BEGIN(CALI_COMM_SMALL);
     MPI_Recv(&max, 1, MPI_INT, partner, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     MPI_Send(&local[0], 1, MPI_INT, partner, 0, MPI_COMM_WORLD);
     CALI_MARK_END(CALI_COMM_SMALL);
+    CALI_MARK_END(CALI_COMM);
     // --- End Communication
 
     // Init buffers for exchange
@@ -76,6 +86,7 @@ void compare_high(int j, std::vector<int>& local, int local_size, int rank, int 
     std::vector<int> buffer_receive(local_size + 1);
 
     // --- Start Computation (Identifying elements to send)
+    CALI_MARK_BEGIN(CALI_COMP);
     CALI_MARK_BEGIN(CALI_COMP_LARGE);
     int send_counter = 0;
     for (int i = 0; i < local_size; i++) {
@@ -88,16 +99,20 @@ void compare_high(int j, std::vector<int>& local, int local_size, int rank, int 
     }
     buffer_send[0] = send_counter;
     CALI_MARK_END(CALI_COMP_LARGE);
+    CALI_MARK_END(CALI_COMP);
     // --- End Computation
 
     // --- Start Communication (Exchange buffers)
+    CALI_MARK_BEGIN(CALI_COMM);
     CALI_MARK_BEGIN(CALI_COMM_SMALL);
     MPI_Recv(buffer_receive.data(), local_size + 1, MPI_INT, partner, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     MPI_Send(buffer_send.data(), send_counter + 1, MPI_INT, partner, 0, MPI_COMM_WORLD);
     CALI_MARK_END(CALI_COMM_SMALL);
+    CALI_MARK_END(CALI_COMM);
     // --- End Communication
 
     // --- Start Computation (Merge buffers)
+    CALI_MARK_BEGIN(CALI_COMP);
     CALI_MARK_BEGIN(CALI_COMP_LARGE);
     std::vector<int> temp_array = local;
     int buffer_size = buffer_receive[0];
@@ -115,6 +130,7 @@ void compare_high(int j, std::vector<int>& local, int local_size, int rank, int 
     }
     std::sort(local.begin(), local.end());
     CALI_MARK_END(CALI_COMP_LARGE);
+    CALI_MARK_END(CALI_COMP);
     // --- End Computation
 }
 
@@ -138,9 +154,11 @@ std::vector<int> bitonicSort(std::vector<int>& inputArray) {
     }
 
     // Broadcast N to all processes
+    CALI_MARK_BEGIN(CALI_COMM);
     CALI_MARK_BEGIN(CALI_COMM_SMALL);
     MPI_Bcast(&N, 1, MPI_INT, 0, MPI_COMM_WORLD);
     CALI_MARK_END(CALI_COMM_SMALL);
+    CALI_MARK_END(CALI_COMM);
 
     // Compute local size and prepare for scattering
     int base_count = N / P;
@@ -159,6 +177,7 @@ std::vector<int> bitonicSort(std::vector<int>& inputArray) {
     std::vector<int> local(local_size);
 
     // Distribute data among processes
+    CALI_MARK_BEGIN(CALI_COMM);
     CALI_MARK_BEGIN(CALI_COMM_LARGE);
     MPI_Scatterv(
         rank == 0 ? inputArray.data() : nullptr,
@@ -172,11 +191,14 @@ std::vector<int> bitonicSort(std::vector<int>& inputArray) {
         MPI_COMM_WORLD
     );
     CALI_MARK_END(CALI_COMM_LARGE);
+    CALI_MARK_END(CALI_COMM);
 
     // Local sort
+    CALI_MARK_BEGIN(CALI_COMP);
     CALI_MARK_BEGIN(CALI_COMP_LARGE);
     std::sort(local.begin(), local.end());
     CALI_MARK_END(CALI_COMP_LARGE);
+    CALI_MARK_END(CALI_COMP);
 
     // Bitonic merge network
     int dimension = static_cast<int>(std::log2(P));
@@ -197,6 +219,7 @@ std::vector<int> bitonicSort(std::vector<int>& inputArray) {
         sortedData.resize(N);
     }
 
+    CALI_MARK_BEGIN(CALI_COMM);
     CALI_MARK_BEGIN(CALI_COMM_LARGE);
     MPI_Gatherv(
         local.data(),
@@ -210,6 +233,7 @@ std::vector<int> bitonicSort(std::vector<int>& inputArray) {
         MPI_COMM_WORLD
     );
     CALI_MARK_END(CALI_COMM_LARGE);
+    CALI_MARK_END(CALI_COMM);
 
     // Return sorted data on rank 0
     if (rank == 0) {
