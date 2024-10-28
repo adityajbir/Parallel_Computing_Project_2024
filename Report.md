@@ -954,7 +954,7 @@ The graphs show the communication time across multiple processes for different m
 The graphs illustrate the total computation time for different matrix sizes (`2^16` to `2^28`) and input types (perturbed, random, sorted, reverse sorted) as the number of processes increases from 2 to 512. Across all input types and matrix sizes, there is a clear trend of decreasing computation time with increasing processes, particularly for larger matrices like `2^24`, `2^26`, and `2^28`. These large matrices see a sharp reduction in time as the number of processes increases up to around 64, beyond which further reductions are minimal, indicating diminishing returns. For smaller matrices (`2^16`), while there is some improvement, the gains are much less pronounced due to the relatively small problem size. The input types do not significantly impact the general trend, though larger matrices consistently show the most benefit from parallelization across all input types. Overall, the RadixSort implementation demonstrates **strong scalability** for large matrix sizes, with the most significant improvements occurring as the number of processes increases up to around 64, after which the performance gains taper off.
 
 
-### Computation Large (Min, Max, Avg., Variance)
+### Communication Large (Min, Max, Avg., Variance)
 <p float="left">
   <img src="graphs/radixSort/comm_large_times_matrix_2^16_input_reverseSorted.jpeg" alt="Radix Sort - Comm Large Times Matrix 2^16 Input ReverseSorted" width="49%" />
   <img src="graphs/radixSort/comm_large_times_matrix_2^20_input_perturbed.jpeg" alt="Radix Sort - Comm Large Times Matrix 2^20 Input Perturbed" width="49%" />
