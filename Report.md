@@ -692,6 +692,36 @@ perform runs that invoke algorithm2 for Sorted, ReverseSorted, and Random data).
 
 Due to issues with grace and as communicated by the TAs, the 1024 processors runs do not work currently and were not included in the analysis
 
+# Algorithm Performance Comparison
+
+## Communication Strong Scaling
+<p float="left">
+  <img src="graphs/algorithm_comparison/performance_comm_large_size_2^20.jpeg" alt="Peformance Comparison - " width="49%" />
+  <img src="graphs/algorithm_comparison/performance_comm_large_size_2^28.jpeg" alt="Merge Sort - Data Init Runtime Times Matrix 2^28 Input ReverseSorted" width="49%" />
+</p>
+The above graphs show strong scaling of Avg. communication time per process for the different algorithms we implemented. For the smaller input size (2<sup>20</sup>), all algorithms have a stable avg time per rank with the exception of Merge Sort, which has a spike after 32 processors. For the larger input size (2<sup>28</sup>), Sample Sort converges after 4 processors, and all of the algorithms show similar  performance in their MPI communication.
+
+
+## Computation Strong Scaling
+<p float="left">
+  <img src="graphs/algorithm_comparison/performance_comp_large_size_2^20.jpeg" alt="Merge Sort - Data Init Runtime Times Matrix 2^28 Input ReverseSorted" width="49%" />
+  <img src="graphs/algorithm_comparison/performance_comp_large_size_2^28.jpeg" alt="Merge Sort - Data Init Runtime Times Matrix 2^28 Input ReverseSorted" width="49%" />
+</p>
+The above graphs show strong scaling of Avg. computation time per process for the different algorithms we implemented. The algorithms show the same behavior, with the computation time per process decreasing as the number of processors increases. This is to be expected as the workload is split amongst more workers, and the data chunks get smaller. Radix sort decreases the fastest, and bitonic sort decreases the slowest.
+
+## Communication Speedup
+<p float="left">
+  <img src="graphs/algorithm_comparison/speedup_comm_large_size_2^20.jpeg" alt="" width="49%" />
+  <img src="graphs/algorithm_comparison/speedup_comm_large_size_2^28.jpeg" alt="" width="49%" />
+</p>
+The images show the speedup of the different sorting algorithms across a varying number of processes under the communication large model. In both plots, we can observe that Sample Sort demonstrates a significantly higher speedup than other algorithms as the number of processes increases, while the other algorithms remain relatively stable. This makes sense when we look at the Communication Strong Scaling plot for 2<sup>28</sup> input size, since Sample Sort starts off with the highest communication time before quickly decreasing.
+
+## Computation Speedup
+<p float="left">
+  <img src="graphs/algorithm_comparison/speedup_comp_large_size_2^20.jpeg" alt="Merge Sort - Data Init Runtime Times Matrix 2^28 Input ReverseSorted" width="49%" />
+  <img src="graphs/algorithm_comparison/speedup_comp_large_size_2^28.jpeg" alt="Merge Sort - Data Init Runtime Times Matrix 2^28 Input ReverseSorted" width="49%" />
+</p>
+The images show the speedup of the different sorting algorithms across a varying number of processes under the computation large model. In both plots, we can observe that Sample Sort demonstrates a significantly higher speedup than other algorithms as the number of processes increases, while the other algorithms remain relatively stable. This makes sense when we look at the Communication Strong Scaling plot for 2<sup>28</sup> input size, since Sample Sort starts off with the highest communication time before quickly decreasing.
 
 ## **Merge Sort**:
 
