@@ -1018,8 +1018,6 @@ This indicates that parallelization is effective up to a certain number of proce
 
 ## **Post presentation analysis**:
 
-# add a few sentences for a post presentation analysis. Did your algorithm perform accordingly? Were there any issues with the implementation. If so, talk about it
-
 ### Merge Sort(Aditya Biradar):
 With my implementation of Merge Sort, I thought it would be efficient with the way I implemented it. However there were some issues with my implementation where it limited the parallelization of the sort and that caused the speedup to go down over time and total time to rise. In term of the issues in my algorithm, one potential bottleneck of the implementation was as I sent the data to the worker arrays to sort the numbers. I only merged them all together back into one array at the root process. To achieve better paralleization, it would have been better to to merge the local subarrays over time so that once it got back to the root process, it would only have to sort 2 arrays. The other potential issue is how I did my final merge within the implementation. I did a minimum heap implementation for the final merge because I thought that would be more efficient rather just than a another merge or final sequential sort. However a heap is very memory intensive and requires a lot of memory allocation and deallocation so this could also slow my speedup down. Overall it was good to learn about paralleizing algorithms and why it could be quicker but also why it could be slower based on implementation.
 
